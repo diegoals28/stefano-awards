@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(start \"\" \"C:\\\\Users\\\\info\\\\stefano-awards\\\\index.html\")",
+      "Bash(copy \"c:\\\\Users\\\\info\\\\Downloads\\\\Image from iOS \\(4\\).jpg\" \"C:\\\\Users\\\\info\\\\stefano-awards\\\\img\\\\chiara.jpg\")",
+      "Bash(cmd /c copy \"c:\\\\Users\\\\info\\\\Downloads\\\\Image from iOS \\(4\\).jpg\" \"C:\\\\Users\\\\info\\\\stefano-awards\\\\img\\\\chiara.jpg\")",
+      "Bash(cmd /c copy \"c:\\\\Users\\\\info\\\\Downloads\\\\Image from iOS \\(5\\).jpg\" \"C:\\\\Users\\\\info\\\\stefano-awards\\\\img\\\\moransito.jpg\")",
+      "Bash(cmd /c copy \"c:\\\\Users\\\\info\\\\Downloads\\\\Image from iOS.jpg\" \"C:\\\\Users\\\\info\\\\stefano-awards\\\\img\\\\vale.jpg\")",
+      "Bash(cmd /c copy \"c:\\\\Users\\\\info\\\\Downloads\\\\Image from iOS \\(2\\).jpg\" \"C:\\\\Users\\\\info\\\\stefano-awards\\\\img\\\\kas.jpg\")",
+      "Bash(cmd /c copy \"c:\\\\Users\\\\info\\\\Downloads\\\\Image from iOS \\(3\\).jpg\" \"C:\\\\Users\\\\info\\\\stefano-awards\\\\img\\\\pedro.jpg\")",
+      "Bash(cmd /c copy \"c:\\\\Users\\\\info\\\\Downloads\\\\Image from iOS \\(6\\).jpg\" \"C:\\\\Users\\\\info\\\\stefano-awards\\\\img\\\\rachele.jpg\")",
+      "Bash(cmd /c copy \"c:\\\\Users\\\\info\\\\Downloads\\\\Image from iOS \\(7\\).jpg\" \"C:\\\\Users\\\\info\\\\stefano-awards\\\\img\\\\diegob.jpg\")",
+      "Bash(cmd /c copy \"c:\\\\Users\\\\info\\\\Downloads\\\\Image from iOS \\(8\\).jpg\" \"C:\\\\Users\\\\info\\\\stefano-awards\\\\img\\\\diegolara.jpg\")",
+      "Bash(cmd /c dir \"C:\\\\Users\\\\info\\\\stefano-awards\\\\img\")",
+      "Bash(cmd /c copy \"c:\\\\Users\\\\info\\\\Dropbox\\\\TuItalianew\\\\PEDRO\\\\0- IO\\\\0-SITO by Vagnoli\\\\tucrocierista.com\\\\uploads 09.08.2024\\\\2024\\\\03\\\\logo-enroma.com_.png\" \"C:\\\\Users\\\\info\\\\stefano-awards\\\\img\\\\logo.png\")",
+      "Bash(powershell -Command:*)",
+      "Bash(start \"\" \"C:\\\\Users\\\\info\\\\stefano-awards\\\\game.html\")"
+    ]
+  }
+}
