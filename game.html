@@ -225,13 +225,39 @@
             margin-bottom: 8px;
         }
 
-        .vote-select {
-            width: 100%;
-            padding: 8px;
-            background: #0b0b12;
+        .vote-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(90px, 1fr));
+            gap: 8px;
+        }
+
+        .vote-option {
+            background: linear-gradient(180deg, #1f1f2e 0%, #12121a 100%);
             border: 2px solid #2f2f3f;
             color: #f7f2e8;
             font-family: 'Oxanium', sans-serif;
+            font-size: 0.7rem;
+            padding: 8px 6px;
+            text-transform: uppercase;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #0a0a0f;
+            transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+        }
+
+        .vote-option:hover {
+            border-color: var(--neon-gold);
+            transform: translateY(-1px);
+        }
+
+        .vote-option.selected {
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 16px rgba(27, 213, 255, 0.5), 0 6px 0 #0a0a0f;
+        }
+
+        .vote-option.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
         }
 
         .vote-actions {
@@ -1170,15 +1196,18 @@
                 <div class="vote-controls">
                     <div class="vote-control">
                         <div class="vote-label">Tu personaje</div>
-                        <select class="vote-select" id="voter-select"></select>
+                        <div class="vote-buttons" id="voter-select"></div>
+                        <input type="hidden" id="voter-value">
                     </div>
                     <div class="vote-control">
                         <div class="vote-label">Mejor trabajador</div>
-                        <select class="vote-select" id="best-select"></select>
+                        <div class="vote-buttons" id="best-select"></div>
+                        <input type="hidden" id="best-value">
                     </div>
                     <div class="vote-control">
                         <div class="vote-label">Peor trabajador</div>
-                        <select class="vote-select" id="worst-select"></select>
+                        <div class="vote-buttons" id="worst-select"></div>
+                        <input type="hidden" id="worst-value">
                     </div>
                     <div class="vote-actions">
                         <button class="vote-btn" id="vote-submit">VOTAR</button>
@@ -1682,10 +1711,6 @@
             updateVoteStatus();
 
             document.getElementById('vote-submit').addEventListener('click', submitVote);
-            document.getElementById('voter-select').addEventListener('change', (e) => {
-                localStorage.setItem('stefano_voter', e.target.value);
-                updateVoteStatus();
-            });
 
             setInterval(() => {
                 updateVoteStatus();
@@ -1700,29 +1725,49 @@
             const worstSelect = document.getElementById('worst-select');
             const options = fighters.map(f => f.name);
 
-            voterSelect.innerHTML = '<option value="">-- Selecciona --</option>';
-            bestSelect.innerHTML = '<option value="">-- Selecciona --</option>';
-            worstSelect.innerHTML = '<option value="">-- Selecciona --</option>';
+            voterSelect.innerHTML = '';
+            bestSelect.innerHTML = '';
+            worstSelect.innerHTML = '';
 
             options.forEach(name => {
-                const opt1 = document.createElement('option');
-                opt1.value = name;
-                opt1.textContent = name;
-                voterSelect.appendChild(opt1);
-
-                const opt2 = document.createElement('option');
-                opt2.value = name;
-                opt2.textContent = name;
-                bestSelect.appendChild(opt2);
-
-                const opt3 = document.createElement('option');
-                opt3.value = name;
-                opt3.textContent = name;
-                worstSelect.appendChild(opt3);
+                voterSelect.appendChild(buildVoteButton('voter', name));
+                bestSelect.appendChild(buildVoteButton('best', name));
+                worstSelect.appendChild(buildVoteButton('worst', name));
             });
 
             const saved = localStorage.getItem('stefano_voter');
-            if (saved) voterSelect.value = saved;
+            if (saved) setVoteSelection('voter', saved, true);
+        }
+
+        function buildVoteButton(type, name) {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'vote-option';
+            btn.textContent = name;
+            btn.dataset.value = name;
+            btn.addEventListener('click', () => {
+                if (btn.classList.contains('disabled')) return;
+                setVoteSelection(type, name, false);
+            });
+            return btn;
+        }
+
+        function setVoteSelection(type, value, silent) {
+            const wrapId = `${type}-select`;
+            const wrap = document.getElementById(wrapId);
+            const hidden = document.getElementById(`${type}-value`);
+            Array.from(wrap.querySelectorAll('.vote-option')).forEach(btn => {
+                btn.classList.toggle('selected', btn.dataset.value === value);
+            });
+            hidden.value = value;
+            if (type === 'voter') {
+                localStorage.setItem('stefano_voter', value);
+            }
+            if (!silent) updateVoteStatus();
+        }
+
+        function getVoteSelection(type) {
+            return document.getElementById(`${type}-value`).value || '';
         }
 
         function getRomeNow() {
@@ -1770,17 +1815,19 @@
             if (!isVotingOpen()) {
                 status.textContent = 'Votacion cerrada. Vuelve el jueves.';
                 document.getElementById('vote-submit').disabled = true;
+                setVoteButtonsDisabled(true);
                 return;
             }
             if (hasVoted) {
                 status.textContent = 'Voto registrado para esta semana.';
                 document.getElementById('vote-submit').disabled = true;
-                document.getElementById('voter-select').disabled = true;
+                setVoteButtonsDisabled(true);
                 return;
             }
-            const voter = document.getElementById('voter-select').value;
+            const voter = getVoteSelection('voter');
             status.textContent = voter ? 'Listo para votar.' : 'Selecciona tu personaje para votar.';
             document.getElementById('vote-submit').disabled = !voter;
+            setVoteButtonsDisabled(false);
         }
 
         function seededRandom(seed) {
@@ -1915,9 +1962,9 @@
                 return;
             }
 
-            const voter = document.getElementById('voter-select').value;
-            const best = document.getElementById('best-select').value;
-            const worst = document.getElementById('worst-select').value;
+            const voter = getVoteSelection('voter');
+            const best = getVoteSelection('best');
+            const worst = getVoteSelection('worst');
 
             if (!voter || !best || !worst) {
                 document.getElementById('vote-status').textContent = 'Completa todos los campos.';
@@ -1946,8 +1993,18 @@
             localStorage.setItem(`stefano_voted_${electionKey}`, '1');
             document.getElementById('vote-status').textContent = 'Voto registrado.';
             document.getElementById('vote-submit').disabled = true;
-            document.getElementById('voter-select').disabled = true;
+            setVoteButtonsDisabled(true);
             refreshVoteResults();
+        }
+
+        function setVoteButtonsDisabled(disabled) {
+            ['voter-select', 'best-select', 'worst-select'].forEach(id => {
+                const wrap = document.getElementById(id);
+                if (!wrap) return;
+                wrap.querySelectorAll('.vote-option').forEach(btn => {
+                    btn.classList.toggle('disabled', disabled);
+                });
+            });
         }
 
         async function refreshVoteResults() {
