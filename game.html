@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stefano Fighter - The Ultimate Battle</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bungee+Shade&family=Oxanium:wght@400;600;800&family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -12,12 +12,26 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --bg-deep: #07070e;
+            --bg-mid: #0f0f1d;
+            --bg-hot: #1b0a0a;
+            --neon-red: #ff3b2f;
+            --neon-gold: #ffcc00;
+            --neon-cyan: #1bd5ff;
+            --neon-green: #4bff4b;
+            --panel: rgba(10, 10, 18, 0.85);
+            --panel-border: #2a2a3a;
+            --panel-glow: rgba(255, 136, 0, 0.35);
+        }
+
         body {
-            font-family: 'Orbitron', sans-serif;
-            background: #000;
-            color: #fff;
+            font-family: 'Oxanium', sans-serif;
+            background: var(--bg-deep);
+            color: #f5f2e7;
             overflow: hidden;
             height: 100vh;
+            letter-spacing: 0.5px;
         }
 
         /* Pantallas */
@@ -33,6 +47,12 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            animation: screen-in 0.35s ease;
+        }
+
+        @keyframes screen-in {
+            0% { opacity: 0; transform: scale(0.98); }
+            100% { opacity: 1; transform: scale(1); }
         }
 
         /* Fondo con rayos y fuego */
@@ -43,9 +63,36 @@
             width: 100%;
             height: 100%;
             background:
-                radial-gradient(ellipse at 50% 50%, rgba(15, 25, 50, 0.6) 0%, transparent 50%),
-                linear-gradient(180deg, #050510 0%, #0a0a1a 30%, #080815 50%, #0a0a18 70%, #030308 100%);
+                radial-gradient(ellipse at 50% 15%, rgba(255, 120, 0, 0.15) 0%, transparent 45%),
+                radial-gradient(ellipse at 20% 40%, rgba(0, 140, 255, 0.2) 0%, transparent 40%),
+                radial-gradient(ellipse at 80% 60%, rgba(255, 40, 40, 0.2) 0%, transparent 45%),
+                linear-gradient(180deg, var(--bg-mid) 0%, #120f1e 45%, var(--bg-hot) 100%);
             z-index: -5;
+        }
+
+        .game-bg::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                repeating-linear-gradient(
+                    180deg,
+                    rgba(255, 255, 255, 0.04) 0px,
+                    rgba(255, 255, 255, 0.04) 1px,
+                    transparent 1px,
+                    transparent 3px
+                );
+            mix-blend-mode: screen;
+            opacity: 0.35;
+        }
+
+        .game-bg::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 50% 50%, transparent 0%, rgba(0, 0, 0, 0.65) 70%);
+            opacity: 0.8;
         }
 
         .lightning-left, .lightning-right {
@@ -59,14 +106,14 @@
 
         .lightning-left {
             left: 0;
-            background: linear-gradient(90deg, rgba(0, 120, 255, 0.7) 0%, rgba(0, 150, 255, 0.3) 20%, transparent 100%);
-            animation: lightning-pulse 2s ease-in-out infinite;
+            background: linear-gradient(90deg, rgba(0, 210, 255, 0.6) 0%, rgba(0, 150, 255, 0.25) 30%, transparent 100%);
+            animation: lightning-pulse 2.4s ease-in-out infinite;
         }
 
         .lightning-right {
             right: 0;
-            background: linear-gradient(-90deg, rgba(0, 120, 255, 0.7) 0%, rgba(0, 150, 255, 0.3) 20%, transparent 100%);
-            animation: lightning-pulse 2s ease-in-out infinite 0.5s;
+            background: linear-gradient(-90deg, rgba(255, 140, 0, 0.6) 0%, rgba(255, 80, 0, 0.25) 30%, transparent 100%);
+            animation: lightning-pulse 2.6s ease-in-out infinite 0.6s;
         }
 
         @keyframes lightning-pulse {
@@ -76,27 +123,33 @@
 
         /* ============ PANTALLA TITULO ============ */
         #title-screen {
-            background: radial-gradient(ellipse at center, #1a0a0a 0%, #000 100%);
+            background: radial-gradient(ellipse at center, rgba(25, 10, 10, 0.7) 0%, rgba(0, 0, 0, 0.9) 70%);
+            padding: 30px 20px 40px;
+            gap: 20px;
+            justify-content: flex-start;
         }
 
         .game-title {
-            font-size: 4rem;
-            font-weight: 900;
+            font-family: 'Bungee Shade', sans-serif;
+            font-size: 4.2rem;
+            font-weight: 400;
             text-transform: uppercase;
-            background: linear-gradient(180deg, #fff 0%, #ffd700 30%, #ff6600 60%, #ff0000 100%);
+            background: linear-gradient(180deg, #fff 0%, var(--neon-gold) 40%, #ff7a00 70%, #ff2424 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 20px rgba(255, 100, 0, 0.8));
-            animation: title-pulse 2s ease-in-out infinite;
+            filter: drop-shadow(0 0 20px rgba(255, 120, 0, 0.7));
+            animation: title-pulse 2.2s ease-in-out infinite;
             text-align: center;
+            letter-spacing: 4px;
         }
 
         .game-subtitle {
-            font-size: 1.5rem;
-            color: #00bfff;
-            text-shadow: 0 0 20px #00bfff;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.95rem;
+            color: var(--neon-cyan);
+            text-shadow: 0 0 18px rgba(27, 213, 255, 0.8);
             margin-top: 10px;
-            letter-spacing: 10px;
+            letter-spacing: 6px;
         }
 
         @keyframes title-pulse {
@@ -106,8 +159,9 @@
 
         .press-start {
             margin-top: 80px;
-            font-size: 1.2rem;
-            color: #ffd700;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.95rem;
+            color: var(--neon-gold);
             animation: blink 1s infinite;
             cursor: pointer;
         }
@@ -118,29 +172,188 @@
         }
 
         .mode-buttons {
-            margin-top: 40px;
+            margin-top: 20px;
             display: flex;
             gap: 30px;
         }
 
+        .vote-panel {
+            margin-top: 20px;
+            width: min(1000px, 95vw);
+            background: var(--panel);
+            border: 2px solid var(--panel-border);
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: 0 0 26px rgba(0, 0, 0, 0.6), 0 0 18px var(--panel-glow) inset;
+        }
+
+        .vote-header {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.8rem;
+            color: var(--neon-gold);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .vote-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .vote-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .vote-control {
+            background: rgba(10, 10, 20, 0.7);
+            border: 2px solid #2f2f3f;
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.7);
+        }
+
+        .vote-label {
+            font-size: 0.7rem;
+            color: #b9b1a2;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .vote-select {
+            width: 100%;
+            padding: 8px;
+            background: #0b0b12;
+            border: 2px solid #2f2f3f;
+            color: #f7f2e8;
+            font-family: 'Oxanium', sans-serif;
+        }
+
+        .vote-actions {
+            grid-column: span 2;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .vote-btn {
+            padding: 10px 16px;
+            background: linear-gradient(180deg, #ff9a1a 0%, #d12900 100%);
+            border: 2px solid var(--neon-gold);
+            color: #1a0a0a;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.7rem;
+            cursor: pointer;
+        }
+
+        .vote-status {
+            font-size: 0.7rem;
+            color: #c7c1b3;
+        }
+
+        .vote-wheel {
+            display: grid;
+            justify-items: center;
+            gap: 10px;
+        }
+
+        .wheel-container {
+            position: relative;
+            width: 180px;
+            height: 180px;
+        }
+
+        .wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 6px solid #1b1b28;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.7), inset 0 0 18px rgba(255, 255, 255, 0.1);
+            background: conic-gradient(from -90deg,
+                #ff7a00 0deg 169.2deg,
+                #ff3030 169.2deg 338.4deg,
+                #ffd45a 338.4deg 360deg);
+            transition: transform 2.2s cubic-bezier(0.2, 0.9, 0.2, 1);
+        }
+
+        .wheel-pointer {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            width: 0;
+            height: 0;
+            transform: translateX(-50%);
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 18px solid #f7f2e8;
+            filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.7));
+        }
+
+        .wheel-result {
+            font-size: 0.7rem;
+            color: var(--neon-gold);
+            text-align: center;
+            min-height: 32px;
+        }
+
+        .wheel-hint {
+            font-size: 0.6rem;
+            color: #b9b1a2;
+            text-align: center;
+        }
+
+        .vote-results {
+            margin-top: 14px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .result-block {
+            background: rgba(10, 10, 20, 0.6);
+            border: 2px solid #2f2f3f;
+            border-radius: 10px;
+            padding: 10px;
+        }
+
+        .result-title {
+            font-size: 0.7rem;
+            color: #b9b1a2;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .result-list {
+            display: grid;
+            gap: 6px;
+            font-size: 0.75rem;
+        }
+
         .mode-btn {
-            font-family: 'Orbitron', sans-serif;
+            font-family: 'Oxanium', sans-serif;
             font-size: 1rem;
-            font-weight: 700;
+            font-weight: 800;
+            text-transform: uppercase;
             padding: 20px 40px;
-            background: linear-gradient(180deg, #333 0%, #111 100%);
-            color: #fff;
-            border: 3px solid #555;
+            background: linear-gradient(180deg, #2b2b3b 0%, #15151f 100%);
+            color: #f7f7f7;
+            border: 3px solid var(--panel-border);
             cursor: pointer;
             transition: all 0.3s ease;
             clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 10px 100%, 0 50%);
+            box-shadow: 0 10px 0 #0a0a0f, 0 0 18px rgba(0, 0, 0, 0.6);
         }
 
         .mode-btn:hover {
-            background: linear-gradient(180deg, #ff6600 0%, #cc3300 100%);
-            border-color: #ffd700;
+            background: linear-gradient(180deg, #ff7a00 0%, #b32000 100%);
+            border-color: var(--neon-gold);
             transform: scale(1.05);
-            box-shadow: 0 0 30px rgba(255, 100, 0, 0.5);
+            box-shadow: 0 0 30px rgba(255, 120, 0, 0.6), 0 0 10px rgba(255, 255, 255, 0.25) inset;
         }
 
         /* ============ ONLINE ============ */
@@ -154,24 +367,27 @@
 
         .online-block {
             padding: 20px;
-            border: 2px solid #333;
-            background: rgba(0, 0, 0, 0.5);
+            border: 3px solid var(--panel-border);
+            background: var(--panel);
             border-radius: 10px;
             text-align: center;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.6), 0 0 18px var(--panel-glow) inset;
         }
 
         .online-title {
-            font-size: 1.2rem;
-            color: #ffd700;
+            font-size: 1.1rem;
+            color: var(--neon-gold);
             margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
 
         .room-code {
             margin-top: 15px;
-            font-size: 1.6rem;
+            font-size: 1.4rem;
             letter-spacing: 6px;
-            color: #00bfff;
-            text-shadow: 0 0 10px #00bfff;
+            color: var(--neon-cyan);
+            text-shadow: 0 0 10px rgba(27, 213, 255, 0.9);
         }
 
         .room-hint {
@@ -184,18 +400,21 @@
             width: 200px;
             padding: 12px;
             margin-bottom: 12px;
-            background: #0a0a0a;
-            border: 2px solid #444;
-            color: #ffd700;
+            background: #0b0b12;
+            border: 2px solid #2f2f3f;
+            color: var(--neon-gold);
             text-transform: uppercase;
             text-align: center;
-            font-family: 'Orbitron', sans-serif;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.7rem;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
         }
 
         .online-status {
             margin-top: 20px;
-            font-size: 0.9rem;
-            color: #aaa;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.65rem;
+            color: #b9b1a2;
         }
 
         /* ============ SELECCION PERSONAJES ============ */
@@ -204,10 +423,11 @@
         }
 
         .select-title {
-            font-size: 2rem;
-            color: #ffd700;
-            text-shadow: 0 0 15px rgba(255, 165, 0, 0.5);
+            font-size: 1.8rem;
+            color: var(--neon-gold);
+            text-shadow: 0 0 15px rgba(255, 165, 0, 0.6);
             margin-bottom: 20px;
+            letter-spacing: 2px;
         }
 
         .select-container {
@@ -224,35 +444,38 @@
         }
 
         .player-label {
-            font-size: 1.5rem;
+            font-size: 1.1rem;
             margin-bottom: 15px;
             padding: 10px;
             border-radius: 5px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
 
         .player-label.p1 {
-            color: #00ff00;
-            background: rgba(0, 255, 0, 0.1);
-            border: 2px solid #00ff00;
+            color: var(--neon-green);
+            background: rgba(0, 255, 0, 0.08);
+            border: 2px solid var(--neon-green);
         }
 
         .player-label.p2 {
-            color: #ff3333;
-            background: rgba(255, 0, 0, 0.1);
-            border: 2px solid #ff3333;
+            color: #ff4c4c;
+            background: rgba(255, 76, 76, 0.1);
+            border: 2px solid #ff4c4c;
         }
 
         .selected-fighter {
             width: 200px;
             height: 250px;
             margin: 0 auto 20px;
-            background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%);
-            border: 4px solid #333;
+            background: linear-gradient(180deg, #161622 0%, #0b0b12 100%);
+            border: 4px solid var(--panel-border);
             border-radius: 10px;
             overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
+            box-shadow: 0 0 18px rgba(0, 0, 0, 0.6), 0 0 12px var(--panel-glow) inset;
         }
 
         .selected-fighter img {
@@ -262,19 +485,20 @@
         }
 
         .selected-fighter.p1-selected {
-            border-color: #00ff00;
+            border-color: var(--neon-green);
             box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
         }
 
         .selected-fighter.p2-selected {
-            border-color: #ff3333;
+            border-color: #ff4c4c;
             box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
         }
 
         .selected-name {
-            font-size: 1.2rem;
-            color: #ffd700;
+            font-size: 1rem;
+            color: var(--neon-gold);
             height: 30px;
+            text-transform: uppercase;
         }
 
         .roster {
@@ -283,20 +507,22 @@
             grid-template-columns: repeat(5, 1fr);
             gap: 10px;
             padding: 20px;
-            background: rgba(0, 0, 0, 0.5);
-            border: 2px solid #333;
+            background: var(--panel);
+            border: 2px solid var(--panel-border);
             border-radius: 10px;
+            box-shadow: 0 0 24px rgba(0, 0, 0, 0.6);
         }
 
         .roster-fighter {
             aspect-ratio: 3/4;
-            background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%);
-            border: 3px solid #444;
+            background: linear-gradient(180deg, #1b1b2b 0%, #0b0b12 100%);
+            border: 3px solid #2f2f3f;
             border-radius: 8px;
             cursor: pointer;
             overflow: hidden;
             transition: all 0.2s ease;
             position: relative;
+            box-shadow: 0 6px 0 #0a0a0f;
         }
 
         .roster-fighter img {
@@ -307,7 +533,7 @@
         }
 
         .roster-fighter:hover {
-            border-color: #ffd700;
+            border-color: var(--neon-gold);
             transform: scale(1.05);
             z-index: 10;
         }
@@ -327,30 +553,33 @@
             bottom: 0;
             left: 0;
             right: 0;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.85);
             padding: 5px;
-            font-size: 0.6rem;
+            font-size: 0.55rem;
             text-align: center;
-            color: #ffd700;
+            color: var(--neon-gold);
+            text-shadow: 0 0 6px rgba(255, 204, 0, 0.6);
         }
 
         .fight-btn {
             margin-top: 30px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.5rem;
-            font-weight: 900;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 1rem;
+            font-weight: 400;
             padding: 20px 80px;
-            background: linear-gradient(180deg, #ff4500 0%, #8b0000 100%);
-            color: #ffd700;
-            border: 4px solid #ffd700;
+            background: linear-gradient(180deg, #ff7a00 0%, #c21f00 100%);
+            color: #1a0a0a;
+            border: 4px solid #ffcf3a;
             cursor: pointer;
             clip-path: polygon(20px 0, calc(100% - 20px) 0, 100% 50%, calc(100% - 20px) 100%, 20px 100%, 0 50%);
             transition: all 0.3s ease;
+            text-shadow: 0 0 10px rgba(255, 220, 120, 0.6);
+            box-shadow: 0 12px 0 #2b0c00, 0 0 25px rgba(255, 120, 0, 0.6);
         }
 
         .fight-btn:hover:not(:disabled) {
-            background: linear-gradient(180deg, #ff6600 0%, #cc0000 100%);
-            box-shadow: 0 0 40px rgba(255, 69, 0, 0.6);
+            background: linear-gradient(180deg, #ff9a1a 0%, #d12900 100%);
+            box-shadow: 0 0 40px rgba(255, 120, 0, 0.7), 0 0 12px rgba(255, 255, 255, 0.3) inset;
             transform: scale(1.05);
         }
 
@@ -372,7 +601,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: linear-gradient(180deg, rgba(0, 0, 0, 0.9) 0%, transparent 100%);
+            background: linear-gradient(180deg, rgba(5, 5, 10, 0.95) 0%, rgba(5, 5, 10, 0.2) 100%);
             z-index: 100;
         }
 
@@ -384,6 +613,8 @@
         .hud-name {
             font-size: 1rem;
             margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .hud-name.p1 { color: #00ff00; text-align: left; }
@@ -391,10 +622,11 @@
 
         .health-bar-container {
             height: 30px;
-            background: #1a1a1a;
-            border: 3px solid #444;
+            background: #13131d;
+            border: 3px solid #34344a;
             position: relative;
             overflow: hidden;
+            box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.8);
         }
 
         .health-bar-container.p1 {
@@ -414,11 +646,11 @@
         }
 
         .health-bar.p1 {
-            background: linear-gradient(180deg, #00ff00 0%, #00aa00 50%, #008800 100%);
+            background: linear-gradient(180deg, #6aff6a 0%, #1ddb1d 50%, #0f8a0f 100%);
         }
 
         .health-bar.p2 {
-            background: linear-gradient(180deg, #ff3333 0%, #cc0000 50%, #990000 100%);
+            background: linear-gradient(180deg, #ff5a5a 0%, #d32121 50%, #8a0f0f 100%);
             float: right;
         }
 
@@ -438,12 +670,13 @@
         }
 
         .timer {
-            font-size: 3rem;
-            font-weight: 900;
-            color: #ffd700;
-            text-shadow: 0 0 15px rgba(255, 165, 0, 0.5);
-            background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%);
-            border: 3px solid #ffd700;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 2.2rem;
+            font-weight: 400;
+            color: var(--neon-gold);
+            text-shadow: 0 0 15px rgba(255, 165, 0, 0.6);
+            background: linear-gradient(180deg, #171723 0%, #0b0b12 100%);
+            border: 3px solid var(--neon-gold);
             border-radius: 10px;
             padding: 5px 20px;
             min-width: 100px;
@@ -461,12 +694,113 @@
             width: 100%;
             position: relative;
             overflow: hidden;
-            background: linear-gradient(180deg,
-                #0a0a1a 0%,
-                #1a1a2a 40%,
-                #2a1a1a 70%,
-                #1a0a0a 100%);
+            background:
+                linear-gradient(180deg, rgba(0, 0, 0, 0.65) 0%, transparent 25%),
+                linear-gradient(180deg, #101022 0%, #1b152a 40%, #26131a 70%, #14090c 100%);
         }
+
+        .arena::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(2px 2px at 10% 20%, rgba(255,255,255,0.6) 0%, transparent 60%),
+                radial-gradient(2px 2px at 80% 30%, rgba(255,255,255,0.4) 0%, transparent 60%),
+                radial-gradient(2px 2px at 40% 60%, rgba(255,255,255,0.5) 0%, transparent 60%),
+                radial-gradient(2px 2px at 70% 80%, rgba(255,255,255,0.35) 0%, transparent 60%),
+                radial-gradient(2px 2px at 20% 85%, rgba(255,255,255,0.3) 0%, transparent 60%);
+            opacity: 0.6;
+            animation: drift-slow 14s linear infinite;
+            z-index: 0;
+        }
+
+        .arena::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 100px;
+            height: 45%;
+            background:
+                repeating-linear-gradient(
+                    90deg,
+                    rgba(0, 0, 0, 0.7) 0 40px,
+                    rgba(0, 0, 0, 0.7) 40px 60px,
+                    transparent 60px 80px
+                ),
+                linear-gradient(180deg, rgba(0, 0, 0, 0.65) 0%, rgba(0, 0, 0, 0) 100%);
+            opacity: 0.55;
+            animation: drift-fast 10s linear infinite;
+            z-index: 1;
+        }
+
+        .arena-flash {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, rgba(255, 220, 120, 0.5) 0%, rgba(255, 120, 0, 0.2) 40%, transparent 70%);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .arena.flash .arena-flash {
+            animation: screen-flash 0.25s ease;
+        }
+
+        .arena.shake {
+            animation: screen-shake 0.2s ease;
+        }
+
+        .arena-props {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .neon-sign {
+            position: absolute;
+            top: 60px;
+            padding: 8px 16px;
+            border: 2px solid #0ff;
+            color: #0ff;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.55rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: rgba(0, 20, 30, 0.6);
+            box-shadow: 0 0 12px rgba(0, 255, 255, 0.6), 0 0 20px rgba(0, 255, 255, 0.4) inset;
+            animation: neon-flicker 4s infinite;
+        }
+
+        .sign-left { left: 8%; transform: rotate(-2deg); }
+        .sign-right { right: 10%; transform: rotate(2deg); border-color: #ff5a5a; color: #ff5a5a; box-shadow: 0 0 12px rgba(255, 90, 90, 0.6), 0 0 20px rgba(255, 90, 90, 0.4) inset; }
+
+        .torch {
+            position: absolute;
+            bottom: 90px;
+            width: 16px;
+            height: 50px;
+            background: linear-gradient(180deg, #1a1a1a 0%, #090909 100%);
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+        }
+
+        .torch::before {
+            content: "";
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            transform: translateX(-50%);
+            background: radial-gradient(circle, rgba(255, 220, 120, 0.9) 0%, rgba(255, 120, 0, 0.6) 40%, transparent 70%);
+            filter: blur(0.5px);
+            animation: flame 0.6s infinite alternate;
+        }
+
+        .torch-left { left: 6%; }
+        .torch-right { right: 6%; }
 
         .arena-floor {
             position: absolute;
@@ -474,12 +808,12 @@
             left: 0;
             right: 0;
             height: 100px;
-            background: linear-gradient(180deg,
-                rgba(50, 50, 50, 0.8) 0%,
-                rgba(30, 30, 30, 0.9) 50%,
-                #1a1a1a 100%);
-            border-top: 4px solid #ff6600;
-            box-shadow: 0 -10px 30px rgba(255, 100, 0, 0.3);
+            background:
+                repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.06) 0 12px, transparent 12px 24px),
+                linear-gradient(180deg, rgba(50, 50, 60, 0.9) 0%, rgba(20, 20, 30, 0.95) 60%, #101018 100%);
+            border-top: 4px solid #ff7a00;
+            box-shadow: 0 -10px 30px rgba(255, 120, 0, 0.4);
+            z-index: 3;
         }
 
         /* Personajes en batalla */
@@ -490,6 +824,8 @@
             height: 250px;
             overflow: hidden;
             transition: left 0.1s, right 0.1s;
+            filter: saturate(1.05);
+            z-index: 4;
         }
 
         .fighter-canvas {
@@ -559,6 +895,42 @@
             50% { bottom: 250px; }
         }
 
+        @keyframes drift-slow {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-120px); }
+        }
+
+        @keyframes drift-fast {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-180px); }
+        }
+
+        @keyframes screen-shake {
+            0% { transform: translate(0, 0); }
+            25% { transform: translate(-6px, 3px); }
+            50% { transform: translate(5px, -4px); }
+            75% { transform: translate(-4px, 2px); }
+            100% { transform: translate(0, 0); }
+        }
+
+        @keyframes screen-flash {
+            0% { opacity: 0.7; }
+            100% { opacity: 0; }
+        }
+
+        @keyframes neon-flicker {
+            0%, 100% { opacity: 1; }
+            45% { opacity: 0.85; }
+            50% { opacity: 0.6; }
+            55% { opacity: 0.9; }
+            60% { opacity: 0.75; }
+        }
+
+        @keyframes flame {
+            0% { transform: translateX(-50%) scale(0.9); opacity: 0.7; }
+            100% { transform: translateX(-50%) scale(1.1); opacity: 1; }
+        }
+
         /* Efectos de golpe */
         .hit-effect {
             position: absolute;
@@ -581,8 +953,8 @@
             position: absolute;
             font-size: 2rem;
             font-weight: 900;
-            color: #ffd700;
-            text-shadow: 0 0 10px #ff6600, 2px 2px 0 #000;
+            color: var(--neon-gold);
+            text-shadow: 0 0 12px rgba(255, 122, 0, 0.9), 2px 2px 0 #000;
             animation: combo-pop 0.3s ease;
             pointer-events: none;
         }
@@ -604,8 +976,8 @@
             transform: translate(-50%, -50%);
             font-size: 4rem;
             font-weight: 900;
-            color: #ffd700;
-            text-shadow: 0 0 30px #ff6600, 4px 4px 0 #000;
+            color: var(--neon-gold);
+            text-shadow: 0 0 30px rgba(255, 122, 0, 0.9), 4px 4px 0 #000;
             animation: announce 1s ease forwards;
             z-index: 300;
         }
@@ -623,22 +995,24 @@
             bottom: 10px;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 0.7rem;
-            color: #666;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.55rem;
+            color: #b9b1a2;
             text-align: center;
             z-index: 100;
         }
 
         /* ============ PANTALLA VICTORIA ============ */
         #victory-screen {
-            background: radial-gradient(ellipse at center, #1a1a0a 0%, #000 100%);
+            background: radial-gradient(ellipse at center, rgba(30, 25, 10, 0.8) 0%, rgba(0, 0, 0, 0.9) 70%);
         }
 
         .victory-text {
-            font-size: 3rem;
-            font-weight: 900;
-            color: #ffd700;
-            text-shadow: 0 0 30px #ffd700;
+            font-family: 'Bungee Shade', sans-serif;
+            font-size: 3.2rem;
+            font-weight: 400;
+            color: var(--neon-gold);
+            text-shadow: 0 0 30px rgba(255, 204, 0, 0.7);
             animation: victory-pulse 1s ease-in-out infinite;
         }
 
@@ -656,32 +1030,52 @@
             width: 250px;
             height: 350px;
             object-fit: cover;
-            border: 5px solid #ffd700;
+            border: 5px solid var(--neon-gold);
             border-radius: 10px;
-            box-shadow: 0 0 40px rgba(255, 215, 0, 0.5);
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.6);
         }
 
         .winner-name {
             font-size: 2rem;
-            color: #ffd700;
+            color: var(--neon-gold);
             margin-top: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
 
         .rematch-btn {
             margin-top: 40px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.2rem;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.8rem;
             padding: 15px 50px;
-            background: linear-gradient(180deg, #333 0%, #111 100%);
-            color: #fff;
-            border: 3px solid #ffd700;
+            background: linear-gradient(180deg, #2b2b3b 0%, #15151f 100%);
+            color: #f7f7f7;
+            border: 3px solid var(--neon-gold);
             cursor: pointer;
             transition: all 0.3s ease;
+            text-transform: uppercase;
         }
 
         .rematch-btn:hover {
-            background: linear-gradient(180deg, #ff6600 0%, #cc3300 100%);
-            box-shadow: 0 0 20px rgba(255, 100, 0, 0.5);
+            background: linear-gradient(180deg, #ff7a00 0%, #b32000 100%);
+            box-shadow: 0 0 20px rgba(255, 120, 0, 0.6);
+        }
+
+        @media (max-width: 900px) {
+            .game-title { font-size: 2.6rem; }
+            .game-subtitle { font-size: 0.7rem; letter-spacing: 3px; }
+            .mode-buttons { flex-direction: column; gap: 15px; }
+            .vote-panel { padding: 14px; }
+            .vote-grid { grid-template-columns: 1fr; }
+            .vote-controls { grid-template-columns: 1fr; }
+            .vote-actions { flex-direction: column; align-items: flex-start; }
+            .vote-results { grid-template-columns: 1fr; }
+            .select-container { flex-direction: column; align-items: center; }
+            .roster { grid-template-columns: repeat(3, 1fr); }
+            .battle-hud { padding: 15px 10px; }
+            .timer { font-size: 1.6rem; }
+            .controls-info { font-size: 0.45rem; }
+            .online-panel { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -700,6 +1094,48 @@
             <button class="mode-btn" onclick="startGame('online')">ONLINE</button>
         </div>
         <p class="press-start">SELECT GAME MODE</p>
+
+        <div class="vote-panel">
+            <div class="vote-header">VOTACION SEMANAL</div>
+            <div class="vote-grid">
+                <div class="vote-controls">
+                    <div class="vote-control">
+                        <div class="vote-label">Tu personaje</div>
+                        <select class="vote-select" id="voter-select"></select>
+                    </div>
+                    <div class="vote-control">
+                        <div class="vote-label">Mejor trabajador</div>
+                        <select class="vote-select" id="best-select"></select>
+                    </div>
+                    <div class="vote-control">
+                        <div class="vote-label">Peor trabajador</div>
+                        <select class="vote-select" id="worst-select"></select>
+                    </div>
+                    <div class="vote-actions">
+                        <button class="vote-btn" id="vote-submit">VOTAR</button>
+                        <div class="vote-status" id="vote-status">Selecciona tu personaje para votar.</div>
+                    </div>
+                </div>
+                <div class="vote-wheel">
+                    <div class="wheel-container">
+                        <div class="wheel" id="fortune-wheel"></div>
+                        <div class="wheel-pointer"></div>
+                    </div>
+                    <div class="wheel-result" id="wheel-result"></div>
+                    <div class="wheel-hint" id="vote-deadline"></div>
+                </div>
+            </div>
+            <div class="vote-results">
+                <div class="result-block">
+                    <div class="result-title">Mejor trabajador (votos)</div>
+                    <div class="result-list" id="best-results"></div>
+                </div>
+                <div class="result-block">
+                    <div class="result-title">Peor trabajador (votos)</div>
+                    <div class="result-list" id="worst-results"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- PANTALLA ONLINE -->
@@ -769,6 +1205,13 @@
         </div>
 
         <div class="arena" id="arena">
+            <div class="arena-flash" id="arena-flash"></div>
+            <div class="arena-props">
+                <div class="neon-sign sign-left">FIGHT</div>
+                <div class="neon-sign sign-right">SNES</div>
+                <div class="torch torch-left"></div>
+                <div class="torch torch-right"></div>
+            </div>
             <div class="arena-floor"></div>
             <div class="fighter p1" id="fighter-p1">
                 <canvas class="fighter-canvas" id="canvas-p1" width="200" height="250"></canvas>
@@ -795,6 +1238,7 @@
         <button class="rematch-btn" onclick="backToSelect()">CHARACTER SELECT</button>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
     <script>
         // Datos de personajes
         const fighters = [
@@ -843,6 +1287,11 @@
             }
         };
 
+        // Supabase (votacion)
+        const SUPABASE_URL = 'https://xrlkvrmtcitikvzgghlw.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhybGt2cm10Y2l0aWt2emdnaGx3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5Njc4OTEsImV4cCI6MjA4NDU0Mzg5MX0.T2yTa5qNE2G9eIutW2EjZeBwzDjmiOz2W--G5u6sV-o';
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
         // Networking (WebRTC + signaling)
         const SIGNALING_URL = 'wss://stefano-awards-production.up.railway.app';
         const LOCAL_KEYS = {
@@ -858,6 +1307,12 @@
             dc: null,
             connected: false
         };
+
+        const VOTE_OUTCOMES = [
+            { id: 'best_to_worst', label: 'El mejor trabajador le ofrece el desayuno al peor', weight: 0.47 },
+            { id: 'worst_to_best', label: 'El peor trabajador ofrece el desayuno al mejor', weight: 0.47 },
+            { id: 'both_offer', label: 'Ambos se ofrecen el desayuno el uno al otro', weight: 0.06 }
+        ];
 
         // Estado de animación de cada jugador
         let animState = {
@@ -1137,6 +1592,221 @@
             if (gameMode !== 'online') return false;
             const role = net.isHost ? 'p1' : 'p2';
             return LOCAL_KEYS[role].includes(key);
+        }
+
+        function initVoting() {
+            populateVoteOptions();
+            const { electionKey, deadlineRome } = getElectionWindow();
+            updateVoteDeadline(deadlineRome);
+            animateWheel(electionKey);
+            refreshVoteResults();
+            updateVoteStatus();
+
+            document.getElementById('vote-submit').addEventListener('click', submitVote);
+            document.getElementById('voter-select').addEventListener('change', (e) => {
+                localStorage.setItem('stefano_voter', e.target.value);
+                updateVoteStatus();
+            });
+
+            setInterval(() => {
+                updateVoteStatus();
+                refreshVoteResults();
+            }, 30000);
+        }
+
+        function populateVoteOptions() {
+            const voterSelect = document.getElementById('voter-select');
+            const bestSelect = document.getElementById('best-select');
+            const worstSelect = document.getElementById('worst-select');
+            const options = fighters.map(f => f.name);
+
+            voterSelect.innerHTML = '<option value="">-- Selecciona --</option>';
+            bestSelect.innerHTML = '<option value="">-- Selecciona --</option>';
+            worstSelect.innerHTML = '<option value="">-- Selecciona --</option>';
+
+            options.forEach(name => {
+                const opt1 = document.createElement('option');
+                opt1.value = name;
+                opt1.textContent = name;
+                voterSelect.appendChild(opt1);
+
+                const opt2 = document.createElement('option');
+                opt2.value = name;
+                opt2.textContent = name;
+                bestSelect.appendChild(opt2);
+
+                const opt3 = document.createElement('option');
+                opt3.value = name;
+                opt3.textContent = name;
+                worstSelect.appendChild(opt3);
+            });
+
+            const saved = localStorage.getItem('stefano_voter');
+            if (saved) voterSelect.value = saved;
+        }
+
+        function getRomeNow() {
+            return new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Rome' }));
+        }
+
+        function getElectionWindow() {
+            const nowRome = getRomeNow();
+            const deadlineRome = new Date(nowRome);
+            deadlineRome.setHours(11, 30, 0, 0);
+
+            const day = nowRome.getDay(); // 0 Sunday - 6 Saturday
+            const daysToThursday = (4 - day + 7) % 7;
+            if (daysToThursday === 0 && nowRome > deadlineRome) {
+                deadlineRome.setDate(deadlineRome.getDate() + 7);
+            } else {
+                deadlineRome.setDate(deadlineRome.getDate() + daysToThursday);
+            }
+
+            const electionKey = `${deadlineRome.getFullYear()}-${String(deadlineRome.getMonth() + 1).padStart(2, '0')}-${String(deadlineRome.getDate()).padStart(2, '0')}-1130`;
+            return { electionKey, deadlineRome };
+        }
+
+        function updateVoteDeadline(deadlineRome) {
+            const deadlineText = deadlineRome.toLocaleString('es-ES', {
+                timeZone: 'Europe/Rome',
+                weekday: 'short',
+                day: '2-digit',
+                month: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            document.getElementById('vote-deadline').textContent = `Cierra: ${deadlineText} (Italia)`;
+        }
+
+        function isVotingOpen() {
+            const { deadlineRome } = getElectionWindow();
+            return getRomeNow() < deadlineRome;
+        }
+
+        function updateVoteStatus() {
+            const status = document.getElementById('vote-status');
+            const { electionKey } = getElectionWindow();
+            const hasVoted = localStorage.getItem(`stefano_voted_${electionKey}`) === '1';
+            if (!isVotingOpen()) {
+                status.textContent = 'Votacion cerrada. Vuelve el jueves.';
+                document.getElementById('vote-submit').disabled = true;
+                return;
+            }
+            if (hasVoted) {
+                status.textContent = 'Voto registrado para esta semana.';
+                document.getElementById('vote-submit').disabled = true;
+                document.getElementById('voter-select').disabled = true;
+                return;
+            }
+            const voter = document.getElementById('voter-select').value;
+            status.textContent = voter ? 'Listo para votar.' : 'Selecciona tu personaje para votar.';
+            document.getElementById('vote-submit').disabled = !voter;
+        }
+
+        function seededRandom(seed) {
+            let hash = 0;
+            for (let i = 0; i < seed.length; i++) {
+                hash = (hash * 31 + seed.charCodeAt(i)) % 1000000007;
+            }
+            return (hash % 10000) / 10000;
+        }
+
+        function pickWeeklyOutcome(electionKey) {
+            const r = seededRandom(electionKey);
+            let acc = 0;
+            for (const outcome of VOTE_OUTCOMES) {
+                acc += outcome.weight;
+                if (r <= acc) return outcome;
+            }
+            return VOTE_OUTCOMES[VOTE_OUTCOMES.length - 1];
+        }
+
+        function animateWheel(electionKey) {
+            const wheel = document.getElementById('fortune-wheel');
+            const outcome = pickWeeklyOutcome(electionKey);
+            const outcomeIndex = VOTE_OUTCOMES.findIndex(o => o.id === outcome.id);
+            const segmentAngles = [0.47 * 360, 0.47 * 360, 0.06 * 360];
+            const startAngles = [0, segmentAngles[0], segmentAngles[0] + segmentAngles[1]];
+            const centerAngle = startAngles[outcomeIndex] + segmentAngles[outcomeIndex] / 2;
+
+            const spins = 4;
+            const targetRotation = spins * 360 - centerAngle;
+            wheel.style.transform = `rotate(${targetRotation}deg)`;
+
+            document.getElementById('wheel-result').textContent = outcome.label;
+        }
+
+        async function submitVote() {
+            if (!isVotingOpen()) {
+                document.getElementById('vote-status').textContent = 'Votacion cerrada.';
+                return;
+            }
+
+            const voter = document.getElementById('voter-select').value;
+            const best = document.getElementById('best-select').value;
+            const worst = document.getElementById('worst-select').value;
+
+            if (!voter || !best || !worst) {
+                document.getElementById('vote-status').textContent = 'Completa todos los campos.';
+                return;
+            }
+            if (best === worst) {
+                document.getElementById('vote-status').textContent = 'Mejor y peor deben ser distintos.';
+                return;
+            }
+
+            const { electionKey } = getElectionWindow();
+            const { error } = await supabaseClient
+                .from('votes')
+                .insert({
+                    election_key: electionKey,
+                    voter,
+                    best,
+                    worst
+                });
+
+            if (error) {
+                document.getElementById('vote-status').textContent = 'No se pudo votar. Puede que ya hayas votado.';
+                return;
+            }
+
+            localStorage.setItem(`stefano_voted_${electionKey}`, '1');
+            document.getElementById('vote-status').textContent = 'Voto registrado.';
+            document.getElementById('vote-submit').disabled = true;
+            document.getElementById('voter-select').disabled = true;
+            refreshVoteResults();
+        }
+
+        async function refreshVoteResults() {
+            const { electionKey } = getElectionWindow();
+            const { data, error } = await supabaseClient
+                .from('votes')
+                .select('best,worst')
+                .eq('election_key', electionKey);
+
+            if (error || !data) {
+                return;
+            }
+
+            const bestCounts = {};
+            const worstCounts = {};
+            data.forEach(row => {
+                bestCounts[row.best] = (bestCounts[row.best] || 0) + 1;
+                worstCounts[row.worst] = (worstCounts[row.worst] || 0) + 1;
+            });
+
+            renderResultList('best-results', bestCounts);
+            renderResultList('worst-results', worstCounts);
+        }
+
+        function renderResultList(targetId, counts) {
+            const target = document.getElementById(targetId);
+            const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+            if (!entries.length) {
+                target.textContent = 'Sin votos aun.';
+                return;
+            }
+            target.innerHTML = entries.map(([name, count]) => `<div>${name}: ${count}</div>`).join('');
         }
 
         // Construir roster
@@ -1600,6 +2270,18 @@
             effect.style.top = (rect.top + 100) + 'px';
             arena.appendChild(effect);
             setTimeout(() => effect.remove(), 200);
+            triggerArenaImpact();
+        }
+
+        function triggerArenaImpact() {
+            const arena = document.getElementById('arena');
+            arena.classList.remove('shake');
+            arena.classList.remove('flash');
+            void arena.offsetWidth;
+            arena.classList.add('shake');
+            arena.classList.add('flash');
+            setTimeout(() => arena.classList.remove('shake'), 220);
+            setTimeout(() => arena.classList.remove('flash'), 260);
         }
 
         function updateHealthBars() {
@@ -1731,6 +2413,10 @@
             if (gameMode === 'online' && net.connected && isLocalOnlineKey(e.key)) {
                 sendDataMessage({ type: 'key', key: e.key, down: false });
             }
+        });
+
+        window.addEventListener('load', () => {
+            initVoting();
         });
     </script>
 </body>
