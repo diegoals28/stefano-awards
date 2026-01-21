@@ -262,10 +262,31 @@
             gap: 10px;
         }
 
+        .vote-wheel.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.98);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .vote-wheel.show {
+            opacity: 1;
+            pointer-events: auto;
+            transform: scale(1);
+        }
+
         .wheel-container {
             position: relative;
             width: 180px;
             height: 180px;
+        }
+
+        .wheel-container.reveal {
+            animation: wheel-reveal 0.6s ease;
+        }
+
+        .wheel-container.spin-pop {
+            animation: wheel-pop 0.4s ease;
         }
 
         .wheel {
@@ -279,6 +300,8 @@
                 #ff3030 169.2deg 338.4deg,
                 #ffd45a 338.4deg 360deg);
             transition: transform 2.2s cubic-bezier(0.2, 0.9, 0.2, 1);
+            position: relative;
+            overflow: hidden;
         }
 
         .wheel-pointer {
@@ -305,6 +328,48 @@
             font-size: 0.6rem;
             color: #b9b1a2;
             text-align: center;
+        }
+
+        .wheel-banner {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.55rem;
+            color: #1bd5ff;
+            text-shadow: 0 0 8px rgba(27, 213, 255, 0.8);
+            letter-spacing: 2px;
+            opacity: 0.9;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 6px;
+            height: 10px;
+            background: #ffd45a;
+            top: 50%;
+            left: 50%;
+            opacity: 0;
+            animation: confetti-fall 1.4s ease forwards;
+        }
+
+        .confetti.c1 { background: #ff7a00; }
+        .confetti.c2 { background: #ff3030; }
+        .confetti.c3 { background: #1bd5ff; }
+        .confetti.c4 { background: #ffd45a; }
+
+        @keyframes wheel-reveal {
+            0% { transform: scale(0.6) rotate(-10deg); opacity: 0; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        @keyframes wheel-pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes confetti-fall {
+            0% { transform: translate(-50%, -50%) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(220deg); opacity: 0; }
         }
 
         .vote-results {
@@ -1092,11 +1157,15 @@
             <button class="mode-btn" onclick="startGame('pvp')">2 PLAYERS</button>
             <button class="mode-btn" onclick="startGame('cpu')">VS CPU</button>
             <button class="mode-btn" onclick="startGame('online')">ONLINE</button>
+            <button class="mode-btn" onclick="showVoteScreen()">VOTE</button>
         </div>
         <p class="press-start">SELECT GAME MODE</p>
+    </div>
 
+    <!-- PANTALLA VOTACION -->
+    <div id="vote-screen" class="screen">
+        <h2 class="select-title">VOTACION SEMANAL</h2>
         <div class="vote-panel">
-            <div class="vote-header">VOTACION SEMANAL</div>
             <div class="vote-grid">
                 <div class="vote-controls">
                     <div class="vote-control">
@@ -1116,11 +1185,12 @@
                         <div class="vote-status" id="vote-status">Selecciona tu personaje para votar.</div>
                     </div>
                 </div>
-                <div class="vote-wheel">
+                <div class="vote-wheel" id="vote-wheel-wrap">
                     <div class="wheel-container">
                         <div class="wheel" id="fortune-wheel"></div>
                         <div class="wheel-pointer"></div>
                     </div>
+                    <div class="wheel-banner" id="wheel-banner">RESULTADOS LISTOS</div>
                     <div class="wheel-result" id="wheel-result"></div>
                     <div class="wheel-hint" id="vote-deadline"></div>
                 </div>
@@ -1136,6 +1206,7 @@
                 </div>
             </div>
         </div>
+        <button class="rematch-btn" onclick="backToTitle()">BACK</button>
     </div>
 
     <!-- PANTALLA ONLINE -->
@@ -1314,6 +1385,8 @@
             { id: 'both_offer', label: 'Ambos se ofrecen el desayuno el uno al otro', weight: 0.06 }
         ];
 
+        let audioCtx = null;
+
         // Estado de animación de cada jugador
         let animState = {
             p1: { anim: 'idle', frame: 0, lastUpdate: 0 },
@@ -1365,6 +1438,12 @@
             prepareSelectScreen();
             showScreen('select-screen');
             buildRoster();
+        }
+
+        function showVoteScreen() {
+            showScreen('vote-screen');
+            ensureAudio();
+            initVoting();
         }
 
         function backToTitle() {
@@ -1598,7 +1677,7 @@
             populateVoteOptions();
             const { electionKey, deadlineRome } = getElectionWindow();
             updateVoteDeadline(deadlineRome);
-            animateWheel(electionKey);
+            updateWheelVisibility();
             refreshVoteResults();
             updateVoteStatus();
 
@@ -1611,6 +1690,7 @@
             setInterval(() => {
                 updateVoteStatus();
                 refreshVoteResults();
+                updateWheelVisibility();
             }, 30000);
         }
 
@@ -1729,11 +1809,104 @@
             const startAngles = [0, segmentAngles[0], segmentAngles[0] + segmentAngles[1]];
             const centerAngle = startAngles[outcomeIndex] + segmentAngles[outcomeIndex] / 2;
 
-            const spins = 4;
-            const targetRotation = spins * 360 - centerAngle;
+            const spins = 5;
+            const jitter = Math.floor(seededRandom(electionKey + '_j') * 30) - 15;
+            const targetRotation = spins * 360 - centerAngle + jitter;
             wheel.style.transform = `rotate(${targetRotation}deg)`;
 
             document.getElementById('wheel-result').textContent = outcome.label;
+        }
+
+        function updateWheelVisibility() {
+            const wheelWrap = document.getElementById('vote-wheel-wrap');
+            const { electionKey } = getElectionWindow();
+            if (isVotingOpen()) {
+                wheelWrap.classList.add('hidden');
+                wheelWrap.classList.remove('show');
+                document.getElementById('wheel-result').textContent = '';
+                return;
+            }
+            wheelWrap.classList.remove('hidden');
+            wheelWrap.classList.add('show');
+            playWheelReveal(electionKey);
+        }
+
+        function playWheelReveal(electionKey) {
+            const wheelWrap = document.getElementById('vote-wheel-wrap');
+            const wheelContainer = wheelWrap.querySelector('.wheel-container');
+            wheelContainer.classList.remove('reveal');
+            wheelContainer.classList.remove('spin-pop');
+            void wheelContainer.offsetWidth;
+            wheelContainer.classList.add('reveal');
+            ensureAudio();
+            animateWheel(electionKey);
+            playWheelSpin();
+            setTimeout(() => {
+                wheelContainer.classList.add('spin-pop');
+                spawnConfetti(wheelContainer);
+                playWheelWin();
+            }, 1200);
+        }
+
+        function ensureAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playWheelSpin() {
+            if (!audioCtx) return;
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(180, now);
+            osc.frequency.exponentialRampToValueAtTime(620, now + 1.1);
+            gain.gain.setValueAtTime(0.0001, now);
+            gain.gain.exponentialRampToValueAtTime(0.12, now + 0.1);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.2);
+            osc.connect(gain).connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + 1.25);
+        }
+
+        function playWheelWin() {
+            if (!audioCtx) return;
+            const now = audioCtx.currentTime;
+            const freqs = [523.25, 659.25, 783.99];
+            freqs.forEach((freq, i) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = i === 1 ? 'triangle' : 'sine';
+                osc.frequency.setValueAtTime(freq, now);
+                gain.gain.setValueAtTime(0.0001, now);
+                gain.gain.exponentialRampToValueAtTime(0.18, now + 0.05);
+                gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
+                osc.connect(gain).connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + 0.65);
+            });
+        }
+
+        function spawnConfetti(container) {
+            const colors = ['c1', 'c2', 'c3', 'c4'];
+            for (let i = 0; i < 28; i++) {
+                const piece = document.createElement('div');
+                piece.className = `confetti ${colors[i % colors.length]}`;
+                const dx = (Math.random() * 240 - 120).toFixed(0) + 'px';
+                const dy = (Math.random() * 220 + 80).toFixed(0) + 'px';
+                piece.style.setProperty('--dx', dx);
+                piece.style.setProperty('--dy', dy);
+                piece.style.transform = `translate(-50%, -50%) rotate(${Math.random() * 180}deg)`;
+                piece.style.left = '50%';
+                piece.style.top = '50%';
+                piece.style.animationDelay = (Math.random() * 0.25).toFixed(2) + 's';
+                container.appendChild(piece);
+                setTimeout(() => piece.remove(), 1600);
+            }
         }
 
         async function submitVote() {
@@ -2416,7 +2589,7 @@
         });
 
         window.addEventListener('load', () => {
-            initVoting();
+            // Voting screen initializes on demand.
         });
     </script>
 </body>
