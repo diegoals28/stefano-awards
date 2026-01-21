@@ -1548,31 +1548,31 @@
         // Datos de personajes
         const fighters = [
             { id: 1, name: "RACHELE", country: "Italia", flag: "🇮🇹", image: "personajes/rachele.png",
-              spriteBase: "sprites/rachele", hasSprite: true,
+              spriteBase: "sprites/rachele", hasSprite: true, spriteOffsetX: 0,
               stats: { power: 85, speed: 75, defense: 80 } },
             { id: 2, name: "CHIARA", country: "Italia", flag: "🇮🇹", image: "personajes/chiara.png",
-              spriteBase: "sprites/chiara", hasSprite: true,
+              spriteBase: "sprites/chiara", hasSprite: true, spriteOffsetX: 0,
               stats: { power: 80, speed: 70, defense: 85 } },
             { id: 3, name: "MORANSITO", country: "El Salvador", flag: "🇸🇻", image: "personajes/moransito.png",
-              spriteBase: "sprites/moransito", hasSprite: true,
+              spriteBase: "sprites/moransito", hasSprite: true, spriteOffsetX: 0,
               stats: { power: 75, speed: 90, defense: 70 } },
             { id: 4, name: "KAS", country: "España", flag: "🇪🇸", image: "personajes/kas.png",
-              spriteBase: "sprites/kas", hasSprite: true,
+              spriteBase: "sprites/kas", hasSprite: true, spriteOffsetX: 0,
               stats: { power: 85, speed: 85, defense: 80 } },
             { id: 5, name: "ALICE", country: "Italia", flag: "🇮🇹", image: "personajes/alice.png",
-              spriteBase: "sprites/alice", hasSprite: true,
+              spriteBase: "sprites/alice", hasSprite: true, spriteOffsetX: 0,
               stats: { power: 70, speed: 95, defense: 75 } },
             { id: 6, name: "DIEGOB", country: "España", flag: "🇪🇸", image: "personajes/diegob.png",
-              spriteBase: "sprites/diegob", hasSprite: true,
+              spriteBase: "sprites/diegob", hasSprite: true, spriteOffsetX: 0,
               stats: { power: 88, speed: 78, defense: 82 } },
             { id: 7, name: "VALE", country: "Italia", flag: "🇮🇹", image: "personajes/vale.png",
-              spriteBase: "sprites/vale", hasSprite: true,
+              spriteBase: "sprites/vale", hasSprite: true, spriteOffsetX: 0,
               stats: { power: 82, speed: 88, defense: 78 } },
             { id: 8, name: "PEDRO", country: "Cuba", flag: "🇨🇺", image: "personajes/pedro.png",
-              spriteBase: "sprites/pedro", hasSprite: true,
+              spriteBase: "sprites/pedro", hasSprite: true, spriteOffsetX: 0,
               stats: { power: 90, speed: 70, defense: 88 } },
             { id: 9, name: "DIEGOLARA", country: "Chile", flag: "🇨🇱", image: "personajes/diegolara.png",
-              spriteBase: "sprites/diegolara", hasSprite: true,
+              spriteBase: "sprites/diegolara", hasSprite: true, spriteOffsetX: -50,
               stats: { power: 78, speed: 82, defense: 85 } }
         ];
 
@@ -1592,7 +1592,7 @@
             }
         };
 
-        const SPRITE_VERSION = 'v2';
+        const SPRITE_VERSION = 'v3';
 
         // Supabase (votacion)
         const SUPABASE_URL = 'https://xrlkvrmtcitikvzgghlw.supabase.co';
@@ -2510,7 +2510,8 @@
             const scale = Math.min(canvas.width / srcW, canvas.height / srcH) * 0.98;
             const destW = srcW * scale;
             const destH = srcH * scale;
-            const destX = (canvas.width - destW) / 2;
+            const offsetX = fighter.spriteOffsetX || 0;
+            const destX = (canvas.width - destW) / 2 + offsetX;
             const destY = canvas.height - destH;
 
             // Dibujar frame (voltear según posición relativa)
