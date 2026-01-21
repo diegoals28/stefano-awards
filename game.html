@@ -141,6 +141,7 @@
             box-shadow: 0 0 30px rgba(0, 0, 0, 0.7), 0 0 18px rgba(255, 140, 0, 0.25) inset;
             position: relative;
             overflow: hidden;
+            animation: hero-in 0.8s ease;
         }
 
         .title-hero::before {
@@ -150,6 +151,15 @@
             background:
                 repeating-linear-gradient(90deg, rgba(255,255,255,0.05) 0 8px, transparent 8px 16px);
             opacity: 0.2;
+        }
+
+        .title-hero::after {
+            content: "";
+            position: absolute;
+            inset: -40% -20%;
+            background: linear-gradient(120deg, transparent 30%, rgba(255, 255, 255, 0.08) 50%, transparent 70%);
+            animation: hero-sweep 3.6s ease-in-out infinite;
+            opacity: 0.7;
         }
 
         .title-ribbon {
@@ -215,6 +225,40 @@
             border: 1px solid #2f2f3f;
             border-radius: 999px;
             color: #f7f2e8;
+        }
+
+        .title-carousel {
+            margin-top: 16px;
+            width: min(980px, 92vw);
+            overflow: hidden;
+            border: 2px solid #2f2f3f;
+            border-radius: 12px;
+            background: rgba(8, 8, 14, 0.7);
+            box-shadow: 0 0 18px rgba(0, 0, 0, 0.6);
+        }
+
+        .carousel-track {
+            display: flex;
+            gap: 12px;
+            padding: 10px 0;
+            animation: carousel-scroll 18s linear infinite;
+        }
+
+        .carousel-card {
+            flex: 0 0 auto;
+            width: 90px;
+            height: 120px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid #2f2f3f;
+            background: #0b0b12;
+            box-shadow: 0 6px 0 #0a0a0f;
+        }
+
+        .carousel-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .game-title {
@@ -533,6 +577,16 @@
             border-color: var(--neon-gold);
             transform: scale(1.05);
             box-shadow: 0 0 30px rgba(255, 120, 0, 0.6), 0 0 10px rgba(255, 255, 255, 0.25) inset;
+        }
+
+        .mode-btn.locked,
+        .mode-btn:disabled {
+            background: linear-gradient(180deg, #2a2a32 0%, #15151a 100%);
+            border-color: #333;
+            color: #777;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
         }
 
         /* ============ ONLINE ============ */
@@ -1110,6 +1164,22 @@
             100% { transform: translateX(-50%) scale(1.1); opacity: 1; }
         }
 
+        @keyframes hero-in {
+            0% { opacity: 0; transform: translateY(8px) scale(0.98); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @keyframes hero-sweep {
+            0% { transform: translateX(-40%); }
+            50% { transform: translateX(20%); }
+            100% { transform: translateX(60%); }
+        }
+
+        @keyframes carousel-scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
         /* Efectos de golpe */
         .hit-effect {
             position: absolute;
@@ -1245,6 +1315,7 @@
             .game-subtitle { font-size: 0.7rem; letter-spacing: 3px; }
             .mode-buttons { flex-direction: column; gap: 15px; }
             .title-grid { grid-template-columns: 1fr; }
+            .carousel-card { width: 70px; height: 90px; }
             .vote-panel { padding: 14px; }
             .vote-grid { grid-template-columns: 1fr; }
             .vote-controls { grid-template-columns: 1fr; }
@@ -1288,11 +1359,33 @@
                 <div class="title-chip">ONLINE READY</div>
             </div>
         </div>
+        <div class="title-carousel">
+            <div class="carousel-track">
+                <div class="carousel-card"><img src="personajes/rachele.png" alt="Rachele"></div>
+                <div class="carousel-card"><img src="personajes/chiara.png" alt="Chiara"></div>
+                <div class="carousel-card"><img src="personajes/moransito.png" alt="Moransito"></div>
+                <div class="carousel-card"><img src="personajes/kas.png" alt="Kas"></div>
+                <div class="carousel-card"><img src="personajes/alice.png" alt="Alice"></div>
+                <div class="carousel-card"><img src="personajes/diegob.png" alt="Diegob"></div>
+                <div class="carousel-card"><img src="personajes/vale.png" alt="Vale"></div>
+                <div class="carousel-card"><img src="personajes/pedro.png" alt="Pedro"></div>
+                <div class="carousel-card"><img src="personajes/diegolara.png" alt="Diegolara"></div>
+                <div class="carousel-card"><img src="personajes/rachele.png" alt="Rachele"></div>
+                <div class="carousel-card"><img src="personajes/chiara.png" alt="Chiara"></div>
+                <div class="carousel-card"><img src="personajes/moransito.png" alt="Moransito"></div>
+                <div class="carousel-card"><img src="personajes/kas.png" alt="Kas"></div>
+                <div class="carousel-card"><img src="personajes/alice.png" alt="Alice"></div>
+                <div class="carousel-card"><img src="personajes/diegob.png" alt="Diegob"></div>
+                <div class="carousel-card"><img src="personajes/vale.png" alt="Vale"></div>
+                <div class="carousel-card"><img src="personajes/pedro.png" alt="Pedro"></div>
+                <div class="carousel-card"><img src="personajes/diegolara.png" alt="Diegolara"></div>
+            </div>
+        </div>
         <div class="mode-buttons">
             <button class="mode-btn" onclick="startGame('pvp')">2 PLAYERS</button>
             <button class="mode-btn" onclick="startGame('cpu')">VS CPU</button>
             <button class="mode-btn" onclick="startGame('online')">ONLINE</button>
-            <button class="mode-btn" onclick="showVoteScreen()">VOTE</button>
+            <button class="mode-btn locked" disabled>VOTE (LOCKED)</button>
         </div>
         <p class="press-start">SELECT GAME MODE</p>
     </div>
