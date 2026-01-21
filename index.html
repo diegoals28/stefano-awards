@@ -1057,8 +1057,8 @@
         .fighter {
             position: absolute;
             bottom: 100px;
-            width: 200px;
-            height: 250px;
+            width: 300px;
+            height: 500px;
             overflow: hidden;
             transition: left 0.1s, right 0.1s;
             filter: saturate(1.05);
@@ -1519,10 +1519,10 @@
             </div>
             <div class="arena-floor"></div>
             <div class="fighter p1" id="fighter-p1">
-                <canvas class="fighter-canvas" id="canvas-p1" width="200" height="250"></canvas>
+                <canvas class="fighter-canvas" id="canvas-p1" width="300" height="500"></canvas>
             </div>
             <div class="fighter p2" id="fighter-p2">
-                <canvas class="fighter-canvas" id="canvas-p2" width="200" height="250"></canvas>
+                <canvas class="fighter-canvas" id="canvas-p2" width="300" height="500"></canvas>
             </div>
         </div>
 
@@ -1592,6 +1592,8 @@
             }
         };
 
+        const SPRITE_VERSION = 'v2';
+
         // Supabase (votacion)
         const SUPABASE_URL = 'https://xrlkvrmtcitikvzgghlw.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhybGt2cm10Y2l0aWt2emdnaGx3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5Njc4OTEsImV4cCI6MjA4NDU0Mzg5MX0.T2yTa5qNE2G9eIutW2EjZeBwzDjmiOz2W--G5u6sV-o';
@@ -1640,7 +1642,7 @@
             const anims = ['idle', 'walk', 'jump', 'punch', 'kick', 'hit'];
             anims.forEach(anim => {
                 const img = new Image();
-                img.src = `${fighter.spriteBase}_${anim}.png`;
+                img.src = `${fighter.spriteBase}_${anim}.png?v=${SPRITE_VERSION}`;
                 spriteImages[player][anim] = img;
             });
         }
@@ -2505,7 +2507,7 @@
             const srcH = SPRITE_CONFIG.height;
 
             // Escala para que quepa en el canvas
-            const scale = Math.min(canvas.width / srcW, canvas.height / srcH) * 0.85;
+            const scale = Math.min(canvas.width / srcW, canvas.height / srcH) * 0.98;
             const destW = srcW * scale;
             const destH = srcH * scale;
             const destX = (canvas.width - destW) / 2;
