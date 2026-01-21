@@ -129,6 +129,94 @@
             justify-content: flex-start;
         }
 
+        .title-hero {
+            margin-top: 10px;
+            width: min(980px, 92vw);
+            padding: 18px 20px;
+            border: 3px solid #3a2b2b;
+            border-radius: 14px;
+            background:
+                linear-gradient(145deg, rgba(255, 150, 0, 0.12), rgba(0, 200, 255, 0.08)),
+                rgba(8, 8, 16, 0.9);
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.7), 0 0 18px rgba(255, 140, 0, 0.25) inset;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .title-hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                repeating-linear-gradient(90deg, rgba(255,255,255,0.05) 0 8px, transparent 8px 16px);
+            opacity: 0.2;
+        }
+
+        .title-ribbon {
+            position: absolute;
+            top: 12px;
+            right: -30px;
+            transform: rotate(8deg);
+            background: linear-gradient(180deg, #ff7a00 0%, #c21f00 100%);
+            color: #1a0a0a;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.55rem;
+            padding: 8px 18px;
+            box-shadow: 0 0 14px rgba(255, 120, 0, 0.6);
+        }
+
+        .title-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 18px;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .title-blurb {
+            font-size: 0.9rem;
+            color: #e8e0cf;
+            line-height: 1.5;
+        }
+
+        .title-blurb strong {
+            color: var(--neon-gold);
+        }
+
+        .title-tips {
+            display: grid;
+            gap: 8px;
+            font-size: 0.7rem;
+            color: #b9b1a2;
+        }
+
+        .title-tips span {
+            display: inline-block;
+            padding: 6px 8px;
+            background: rgba(10, 10, 20, 0.6);
+            border: 1px solid #2f2f3f;
+            border-radius: 6px;
+        }
+
+        .title-strip {
+            margin-top: 14px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .title-chip {
+            padding: 6px 10px;
+            font-size: 0.6rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid #2f2f3f;
+            border-radius: 999px;
+            color: #f7f2e8;
+        }
+
         .game-title {
             font-family: 'Bungee Shade', sans-serif;
             font-size: 4.2rem;
@@ -1156,6 +1244,7 @@
             .game-title { font-size: 2.6rem; }
             .game-subtitle { font-size: 0.7rem; letter-spacing: 3px; }
             .mode-buttons { flex-direction: column; gap: 15px; }
+            .title-grid { grid-template-columns: 1fr; }
             .vote-panel { padding: 14px; }
             .vote-grid { grid-template-columns: 1fr; }
             .vote-controls { grid-template-columns: 1fr; }
@@ -1179,6 +1268,26 @@
     <div id="title-screen" class="screen active">
         <h1 class="game-title">STEFANO<br>FIGHTER</h1>
         <p class="game-subtitle">THE ULTIMATE BATTLE</p>
+        <div class="title-hero">
+            <div class="title-ribbon">NEW SEASON</div>
+            <div class="title-grid">
+                <div class="title-blurb">
+                    Bienvenido a la arena. <strong>Elige tu fighter</strong>, domina los combos y deja tu voto semanal.
+                    Estetica SNES con peleas rapidas y actitud.
+                </div>
+                <div class="title-tips">
+                    <span>Combos rapidos + golpes precisos</span>
+                    <span>Online P2P sin lobby pesado</span>
+                    <span>Voto semanal con rueda sorpresa</span>
+                </div>
+            </div>
+            <div class="title-strip">
+                <div class="title-chip">SNES STYLE</div>
+                <div class="title-chip">PIXEL CLEAN</div>
+                <div class="title-chip">WEEKLY VOTE</div>
+                <div class="title-chip">ONLINE READY</div>
+            </div>
+        </div>
         <div class="mode-buttons">
             <button class="mode-btn" onclick="startGame('pvp')">2 PLAYERS</button>
             <button class="mode-btn" onclick="startGame('cpu')">VS CPU</button>
