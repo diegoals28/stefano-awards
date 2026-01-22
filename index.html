@@ -1652,9 +1652,21 @@
         let currentSelect = 'p1';
         let selectedP1 = null;
         let selectedP2 = null;
+        const MOVEMENT = {
+            accel: 0.08,
+            maxSpeed: 0.85,
+            friction: 0.06,
+            minDistance: 29,
+            attackRange: 41,
+            knockbackPunch: 1.4,
+            knockbackKick: 2.1
+        };
+
+        let cpuInput = { move: 0, block: false };
+
         let gameState = {
-            p1: { health: 100, x: 15, jumping: false, crouching: false, blocking: false, canAttack: true },
-            p2: { health: 100, x: 85, jumping: false, crouching: false, blocking: false, canAttack: true },
+            p1: { health: 100, x: 15, vx: 0, jumping: false, crouching: false, blocking: false, canAttack: true },
+            p2: { health: 100, x: 85, vx: 0, jumping: false, crouching: false, blocking: false, canAttack: true },
             timer: 99,
             round: 1,
             paused: false
@@ -2341,12 +2353,13 @@
 
             // Reset estado
             gameState = {
-                p1: { health: 100, x: 15, jumping: false, crouching: false, blocking: false, walking: false, canAttack: true },
-                p2: { health: 100, x: 85, jumping: false, crouching: false, blocking: false, walking: false, canAttack: true },
+                p1: { health: 100, x: 15, vx: 0, jumping: false, crouching: false, blocking: false, walking: false, canAttack: true },
+                p2: { health: 100, x: 85, vx: 0, jumping: false, crouching: false, blocking: false, walking: false, canAttack: true },
                 timer: 99,
                 round: 1,
                 paused: false
             };
+            cpuInput = { move: 0, block: false };
 
             // Reset animación
             animState = {
@@ -2506,8 +2519,8 @@
             const srcW = animConfig.fw;
             const srcH = SPRITE_CONFIG.height;
 
-            // Escala para que quepa en el canvas
-            const scale = Math.min(canvas.width / srcW, canvas.height / srcH) * 0.98;
+            // Escala consistente para evitar que animaciones anchas (patada) se encojan
+            const scale = (canvas.height / srcH) * 0.98;
             const destW = srcW * scale;
             const destH = srcH * scale;
             const offsetX = fighter.spriteOffsetX || 0;
@@ -2558,21 +2571,72 @@
             }
         }
 
+        function applyMovement(player, axis) {
+            const state = gameState[player];
+            const fighter = player === 'p1' ? selectedP1 : selectedP2;
+            const speedScale = fighter && fighter.stats ? (fighter.stats.speed / 85) : 1;
+            const accel = MOVEMENT.accel * speedScale;
+            const maxSpeed = MOVEMENT.maxSpeed * speedScale;
+
+            state.walking = axis !== 0;
+            if (axis !== 0) {
+                state.vx += accel * axis;
+                state.vx = Math.max(-maxSpeed, Math.min(maxSpeed, state.vx));
+            } else {
+                if (Math.abs(state.vx) < MOVEMENT.friction) {
+                    state.vx = 0;
+                } else {
+                    state.vx -= MOVEMENT.friction * Math.sign(state.vx);
+                }
+            }
+
+            state.x += state.vx;
+
+            const bounds = player === 'p1' ? { min: 5, max: 85 } : { min: 15, max: 95 };
+            if (state.x < bounds.min) {
+                state.x = bounds.min;
+                state.vx = 0;
+            }
+            if (state.x > bounds.max) {
+                state.x = bounds.max;
+                state.vx = 0;
+            }
+        }
+
+        function enforceSpacing() {
+            const minDistance = MOVEMENT.minDistance;
+            const p1Min = 5;
+            const p1Max = 85;
+            const p2Min = 15;
+            const p2Max = 95;
+
+            gameState.p1.x = Math.max(p1Min, Math.min(p1Max, gameState.p1.x));
+            gameState.p2.x = Math.max(p2Min, Math.min(p2Max, gameState.p2.x));
+
+            const distance = gameState.p2.x - gameState.p1.x;
+            if (distance >= minDistance) return;
+
+            if (gameState.p1.x <= p1Min + 0.01) {
+                gameState.p2.x = Math.min(p2Max, gameState.p1.x + minDistance);
+            } else if (gameState.p2.x >= p2Max - 0.01) {
+                gameState.p1.x = Math.max(p1Min, gameState.p2.x - minDistance);
+            } else {
+                const mid = (gameState.p1.x + gameState.p2.x) / 2;
+                gameState.p1.x = mid - minDistance / 2;
+                gameState.p2.x = mid + minDistance / 2;
+            }
+
+            gameState.p1.vx = 0;
+            gameState.p2.vx = 0;
+        }
+
         function update() {
-            // Movimiento P1
             const p1El = document.getElementById('fighter-p1');
             const p2El = document.getElementById('fighter-p2');
 
-            // Walking P1
-            gameState.p1.walking = false;
-            if (keys['a'] || keys['A']) {
-                gameState.p1.x = Math.max(5, gameState.p1.x - 0.5);
-                gameState.p1.walking = true;
-            }
-            if (keys['d'] || keys['D']) {
-                gameState.p1.x = Math.min(85, gameState.p1.x + 0.5);
-                gameState.p1.walking = true;
-            }
+            const p1Axis = (keys['d'] || keys['D'] ? 1 : 0) + (keys['a'] || keys['A'] ? -1 : 0);
+            applyMovement('p1', p1Axis);
+
             if (keys['s'] || keys['S']) {
                 gameState.p1.crouching = true;
             } else {
@@ -2589,17 +2653,10 @@
                 p1El.classList.remove('blocking');
             }
 
-            // Movimiento P2
             if (gameMode !== 'cpu') {
-                gameState.p2.walking = false;
-                if (keys['ArrowLeft']) {
-                    gameState.p2.x = Math.max(15, gameState.p2.x - 0.5);
-                    gameState.p2.walking = true;
-                }
-                if (keys['ArrowRight']) {
-                    gameState.p2.x = Math.min(95, gameState.p2.x + 0.5);
-                    gameState.p2.walking = true;
-                }
+                const p2Axis = (keys['ArrowRight'] ? 1 : 0) + (keys['ArrowLeft'] ? -1 : 0);
+                applyMovement('p2', p2Axis);
+
                 if (keys['ArrowDown']) {
                     gameState.p2.crouching = true;
                 } else {
@@ -2615,13 +2672,17 @@
                     gameState.p2.blocking = false;
                     p2El.classList.remove('blocking');
                 }
+            } else {
+                applyMovement('p2', cpuInput.move);
+                gameState.p2.blocking = cpuInput.block;
+                p2El.classList.toggle('blocking', cpuInput.block);
             }
 
-            // Actualizar posiciones
+            enforceSpacing();
+
             p1El.style.left = gameState.p1.x + '%';
             p2El.style.right = (100 - gameState.p2.x) + '%';
 
-            // Determinar animaciones
             determineAnimation('p1');
             determineAnimation('p2');
         }
@@ -2660,7 +2721,8 @@
 
             // Verificar distancia
             const distance = Math.abs(gameState.p1.x - gameState.p2.x);
-            if (distance < 20) {
+            const reach = type === 'kick' ? MOVEMENT.attackRange + 6 : MOVEMENT.attackRange;
+            if (distance <= reach) {
                 // Calcular daño
                 let baseDamage = type === 'punch' ? 8 : 12;
                 let damage = baseDamage * (attackerFighter.stats.power / 100);
@@ -2690,12 +2752,21 @@
                     setAnimation(defender, 'hit');
 
                     showHitEffect(defender);
+                    applyKnockback(attacker, defender, type === 'kick' ? MOVEMENT.knockbackKick : MOVEMENT.knockbackPunch);
+                    enforceSpacing();
 
                     if (defenderState.health <= 0) {
                         endRound();
                     }
                 }
             }
+        }
+
+        function applyKnockback(attacker, defender, force) {
+            const attackerState = gameState[attacker];
+            const defenderState = gameState[defender];
+            const direction = attackerState.x <= defenderState.x ? 1 : -1;
+            defenderState.x += direction * force;
         }
 
         function showHitEffect(target) {
@@ -2788,27 +2859,22 @@
         function cpuAI() {
             const distance = Math.abs(gameState.p1.x - gameState.p2.x);
 
-            // Moverse hacia el jugador
-            if (distance > 20) {
-                if (gameState.p1.x < gameState.p2.x) {
-                    gameState.p2.x -= 0.3;
-                } else {
-                    gameState.p2.x += 0.3;
-                }
+            if (distance > MOVEMENT.attackRange + 4) {
+                cpuInput.move = gameState.p1.x < gameState.p2.x ? -1 : 1;
+            } else if (distance < MOVEMENT.minDistance + 2) {
+                cpuInput.move = gameState.p1.x < gameState.p2.x ? 1 : -1;
+            } else {
+                cpuInput.move = 0;
             }
 
-            // Atacar cuando está cerca
-            if (distance < 20 && Math.random() < 0.03) {
+            if (distance <= MOVEMENT.attackRange + 2 && Math.random() < 0.03) {
                 attack('p2', Math.random() < 0.5 ? 'punch' : 'kick');
             }
 
-            // Bloquear ocasionalmente
             if (Math.random() < 0.01) {
-                gameState.p2.blocking = true;
-                document.getElementById('fighter-p2').classList.add('blocking');
+                cpuInput.block = true;
                 setTimeout(() => {
-                    gameState.p2.blocking = false;
-                    document.getElementById('fighter-p2').classList.remove('blocking');
+                    cpuInput.block = false;
                 }, 500);
             }
         }
