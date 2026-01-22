@@ -1170,6 +1170,17 @@
             filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.8)) brightness(2);
         }
 
+        .fighter.hit::after {
+            content: "";
+            position: absolute;
+            inset: 10px;
+            border: 2px solid rgba(255, 230, 120, 0.9);
+            box-shadow: 0 0 18px rgba(255, 210, 80, 0.8), 0 0 28px rgba(255, 120, 0, 0.7);
+            opacity: 0;
+            animation: hit-flare 0.25s ease;
+            pointer-events: none;
+        }
+
         .fighter.blocking .fighter-sprite {
             filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.8)) brightness(0.7);
         }
@@ -1201,6 +1212,12 @@
             25% { transform: translateX(-20px); }
             75% { transform: translateX(10px); }
             100% { transform: translateX(0); }
+        }
+
+        @keyframes hit-flare {
+            0% { opacity: 0; transform: scale(0.9); }
+            50% { opacity: 1; transform: scale(1.02); }
+            100% { opacity: 0; transform: scale(1.05); }
         }
 
         @keyframes jump {
@@ -1686,7 +1703,7 @@
             }
         };
 
-        const SPRITE_VERSION = 'v4';
+        const SPRITE_VERSION = 'v5';
         const MAX_HEALTH = 150;
 
         // Supabase (votacion)
@@ -1755,8 +1772,8 @@
             friction: 0.05,
             airControl: 0.7,
             airFriction: 0.3,
-            minDistance: 7,
-            attackRange: 17,
+            minDistance: 14,
+            attackRange: 23,
             knockbackPunch: 1.4,
             knockbackKick: 2.1
         };
