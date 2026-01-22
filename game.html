@@ -798,6 +798,63 @@
             text-shadow: 0 0 6px rgba(255, 204, 0, 0.6);
         }
 
+        .stage-panel {
+            width: min(900px, 92vw);
+            background: var(--panel);
+            border: 2px solid var(--panel-border);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 18px;
+            box-shadow: 0 0 24px rgba(0, 0, 0, 0.6);
+        }
+
+        .stage-grid {
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .stage-card {
+            background: linear-gradient(180deg, #1b1b2b 0%, #0b0b12 100%);
+            border: 3px solid #2f2f3f;
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #0a0a0f;
+            transition: all 0.2s ease;
+        }
+
+        .stage-card:hover {
+            border-color: var(--neon-gold);
+            transform: translateY(-4px);
+        }
+
+        .stage-card.selected {
+            border-color: var(--neon-green);
+            box-shadow: 0 0 18px rgba(0, 255, 0, 0.45);
+        }
+
+        .stage-thumb {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background-size: cover;
+            background-position: center;
+            image-rendering: pixelated;
+        }
+
+        .stage-name {
+            padding: 10px;
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--neon-gold);
+            text-transform: uppercase;
+            background: rgba(0, 0, 0, 0.8);
+        }
+
         .fight-btn {
             margin-top: 30px;
             font-family: 'Press Start 2P', monospace;
@@ -1488,6 +1545,16 @@
         <button class="fight-btn" id="fight-btn" disabled onclick="onFightButton()">FIGHT!</button>
     </div>
 
+    <!-- SELECCION DE ESCENA -->
+    <div id="stage-screen" class="screen">
+        <h2 class="select-title">SELECT STAGE</h2>
+        <div class="stage-panel">
+            <div class="stage-grid" id="stage-grid"></div>
+            <button class="fight-btn" id="stage-start-btn" disabled onclick="onStageStart()">START BATTLE</button>
+            <button class="rematch-btn" onclick="backToSelect()">BACK</button>
+        </div>
+    </div>
+
     <!-- ARENA DE COMBATE -->
     <div id="battle-screen" class="screen">
         <div class="battle-hud">
@@ -1576,6 +1643,14 @@
               stats: { power: 78, speed: 82, defense: 85 } }
         ];
 
+        const stages = [
+            {
+                id: 'departamento-chistes',
+                name: 'Departamento de Chistes',
+                image: 'assets/backgrounds/departamento-chistes.png'
+            }
+        ];
+
         // Configuración de sprites separados por animación (Rachele)
         // Cada archivo es una tira horizontal de frames del mismo tamaño
         const SPRITE_CONFIG = {
@@ -1652,6 +1727,7 @@
         let currentSelect = 'p1';
         let selectedP1 = null;
         let selectedP2 = null;
+        let selectedStage = null;
         const MOVEMENT = {
             accelSlow: 0.06,
             accelFast: 0.14,
@@ -1705,6 +1781,7 @@
         function prepareSelectScreen() {
             selectedP1 = null;
             selectedP2 = null;
+            selectedStage = null;
             currentSelect = 'p1';
             document.getElementById('p1-preview').innerHTML = '<span style="color: #444;">?</span>';
             document.getElementById('p2-preview').innerHTML = '<span style="color: #444;">?</span>';
@@ -1888,6 +1965,15 @@
                 const fighter = fighters.find(f => f.id === msg.fighterId);
                 if (fighter) {
                     applySelection(msg.role, fighter, true);
+                }
+            }
+            if (msg.type === 'stage-open') {
+                showStageScreen();
+            }
+            if (msg.type === 'stage') {
+                const stage = stages.find(s => s.id === msg.stageId);
+                if (stage) {
+                    applyStageSelection(stage, true);
                 }
             }
             if (msg.type === 'start') {
@@ -2342,7 +2428,61 @@
             }
         }
 
-        function onFightButton() {
+        function buildStageGrid() {
+            const grid = document.getElementById('stage-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            stages.forEach(stage => {
+                const card = document.createElement('div');
+                card.className = 'stage-card';
+                card.dataset.id = stage.id;
+                card.innerHTML = `
+                    <div class="stage-thumb" style="background-image: url('${stage.image}')"></div>
+                    <div class="stage-name">${stage.name}</div>
+                `;
+                card.addEventListener('click', () => {
+                    applyStageSelection(stage, false);
+                });
+                grid.appendChild(card);
+            });
+
+            if (!selectedStage && stages.length === 1 && (gameMode !== 'online' || net.isHost)) {
+                applyStageSelection(stages[0], false);
+            }
+        }
+
+        function applyStageSelection(stage, isRemote) {
+            selectedStage = stage;
+            document.querySelectorAll('.stage-card').forEach(card => {
+                card.classList.toggle('selected', card.dataset.id === stage.id);
+            });
+            const startBtn = document.getElementById('stage-start-btn');
+            if (startBtn) {
+                startBtn.disabled = false;
+                if (gameMode === 'online') {
+                    startBtn.textContent = net.isHost ? 'START BATTLE' : 'WAITING HOST';
+                }
+            }
+            if (gameMode === 'online' && net.isHost && !isRemote) {
+                sendDataMessage({ type: 'stage', stageId: stage.id });
+            }
+        }
+
+        function showStageScreen() {
+            showScreen('stage-screen');
+            buildStageGrid();
+            const startBtn = document.getElementById('stage-start-btn');
+            if (startBtn) {
+                startBtn.disabled = !selectedStage;
+                if (gameMode === 'online') {
+                    startBtn.textContent = net.isHost ? 'START BATTLE' : 'WAITING HOST';
+                }
+            }
+        }
+
+        function onStageStart() {
+            if (!selectedStage) return;
             if (gameMode === 'online') {
                 if (!net.isHost) return;
                 sendDataMessage({ type: 'start' });
@@ -2350,9 +2490,32 @@
             startBattle();
         }
 
+        function applyStageBackground() {
+            const arena = document.getElementById('arena');
+            if (!arena) return;
+            const stage = selectedStage || stages[0];
+            if (!stage) return;
+            arena.style.backgroundImage = `url('${stage.image}')`;
+            arena.style.backgroundSize = 'cover';
+            arena.style.backgroundPosition = 'center bottom';
+            arena.style.backgroundRepeat = 'no-repeat';
+        }
+
+        function onFightButton() {
+            if (gameMode === 'online') {
+                if (!net.isHost) return;
+                sendDataMessage({ type: 'stage-open' });
+            }
+            showStageScreen();
+        }
+
         // Iniciar batalla
         function startBattle() {
             showScreen('battle-screen');
+            if (!selectedStage && stages.length) {
+                selectedStage = stages[0];
+            }
+            applyStageBackground();
 
             // Reset estado
             gameState = {
