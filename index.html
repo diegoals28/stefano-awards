@@ -1653,11 +1653,13 @@
         let selectedP1 = null;
         let selectedP2 = null;
         const MOVEMENT = {
-            accel: 0.08,
-            maxSpeed: 0.85,
-            friction: 0.06,
-            minDistance: 29,
-            attackRange: 41,
+            accel: 0.1,
+            maxSpeed: 0.95,
+            friction: 0.05,
+            airControl: 0.7,
+            airFriction: 0.3,
+            minDistance: 22,
+            attackRange: 32,
             knockbackPunch: 1.4,
             knockbackKick: 2.1
         };
@@ -2575,7 +2577,8 @@
             const state = gameState[player];
             const fighter = player === 'p1' ? selectedP1 : selectedP2;
             const speedScale = fighter && fighter.stats ? (fighter.stats.speed / 85) : 1;
-            const accel = MOVEMENT.accel * speedScale;
+            const airFactor = state.jumping ? MOVEMENT.airControl : 1;
+            const accel = MOVEMENT.accel * speedScale * airFactor;
             const maxSpeed = MOVEMENT.maxSpeed * speedScale;
 
             state.walking = axis !== 0;
@@ -2583,10 +2586,11 @@
                 state.vx += accel * axis;
                 state.vx = Math.max(-maxSpeed, Math.min(maxSpeed, state.vx));
             } else {
-                if (Math.abs(state.vx) < MOVEMENT.friction) {
+                const friction = MOVEMENT.friction * (state.jumping ? MOVEMENT.airFriction : 1);
+                if (Math.abs(state.vx) < friction) {
                     state.vx = 0;
                 } else {
-                    state.vx -= MOVEMENT.friction * Math.sign(state.vx);
+                    state.vx -= friction * Math.sign(state.vx);
                 }
             }
 
