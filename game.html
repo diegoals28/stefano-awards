@@ -2195,12 +2195,6 @@
         function updateWheelVisibility() {
             const wheelWrap = document.getElementById('vote-wheel-wrap');
             const { electionKey } = getElectionWindow();
-            if (isVotingOpen()) {
-                wheelWrap.classList.add('hidden');
-                wheelWrap.classList.remove('show');
-                document.getElementById('wheel-result').textContent = '';
-                return;
-            }
             wheelWrap.classList.remove('hidden');
             wheelWrap.classList.add('show');
             playWheelReveal(electionKey);
@@ -2783,7 +2777,7 @@
 
             state.x += state.vx;
 
-            const bounds = player === 'p1' ? { min: 5, max: 85 } : { min: 15, max: 95 };
+            const bounds = { min: 5, max: 95 };
             if (state.x < bounds.min) {
                 state.x = bounds.min;
                 state.vx = 0;
@@ -2796,26 +2790,20 @@
 
         function enforceSpacing() {
             const minDistance = MOVEMENT.minDistance;
-            const p1Min = 5;
-            const p1Max = 85;
-            const p2Min = 15;
-            const p2Max = 95;
+            const minBound = 5;
+            const maxBound = 95;
 
-            gameState.p1.x = Math.max(p1Min, Math.min(p1Max, gameState.p1.x));
-            gameState.p2.x = Math.max(p2Min, Math.min(p2Max, gameState.p2.x));
+            gameState.p1.x = Math.max(minBound, Math.min(maxBound, gameState.p1.x));
+            gameState.p2.x = Math.max(minBound, Math.min(maxBound, gameState.p2.x));
 
-            const distance = gameState.p2.x - gameState.p1.x;
+            const delta = gameState.p2.x - gameState.p1.x;
+            const distance = Math.abs(delta);
             if (distance >= minDistance) return;
 
-            if (gameState.p1.x <= p1Min + 0.01) {
-                gameState.p2.x = Math.min(p2Max, gameState.p1.x + minDistance);
-            } else if (gameState.p2.x >= p2Max - 0.01) {
-                gameState.p1.x = Math.max(p1Min, gameState.p2.x - minDistance);
-            } else {
-                const mid = (gameState.p1.x + gameState.p2.x) / 2;
-                gameState.p1.x = mid - minDistance / 2;
-                gameState.p2.x = mid + minDistance / 2;
-            }
+            const push = (minDistance - distance) / 2;
+            const direction = delta >= 0 ? 1 : -1;
+            gameState.p1.x -= push * direction;
+            gameState.p2.x += push * direction;
 
             gameState.p1.vx = 0;
             gameState.p2.vx = 0;
