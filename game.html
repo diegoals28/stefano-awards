@@ -870,6 +870,10 @@
             letter-spacing: 0.5px;
         }
 
+        .selected-fighter.same-fighter img {
+            filter: grayscale(1) brightness(0.85);
+        }
+
         .roster {
             flex: 2;
             display: grid;
@@ -920,6 +924,20 @@
             transition: all 0.2s ease;
             position: relative;
             box-shadow: 0 6px 0 #0a0a0f;
+        }
+
+        .roster-fighter.random {
+            display: grid;
+            place-items: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--neon-cyan);
+            background: linear-gradient(180deg, rgba(12, 18, 30, 0.9), rgba(6, 10, 18, 0.9));
+        }
+
+        .roster-fighter.random .fighter-name {
+            color: var(--neon-cyan);
+            font-size: 0.65rem;
         }
 
         .roster-fighter.locked {
@@ -1329,6 +1347,10 @@
             z-index: 4;
         }
 
+        .fighter.same-fighter {
+            filter: grayscale(1) brightness(0.85);
+        }
+
         .fighter-canvas {
             width: 100%;
             height: 100%;
@@ -1341,7 +1363,7 @@
         }
 
         .fighter.p2 {
-            right: 15%;
+            left: 85%;
         }
 
         .fighter.p2 .fighter-sprite {
@@ -1932,6 +1954,11 @@
                 id: 'departamento-chistes',
                 name: 'Departamento de Chistes',
                 image: 'assets/backgrounds/departamento-chistes.png'
+            },
+            {
+                id: 'departamento-operativo',
+                name: 'Departamento Operativo',
+                image: 'assets/backgrounds/departamento-operativo.png'
             }
         ];
 
@@ -2086,6 +2113,7 @@
             document.getElementById('p2-preview').innerHTML = '<span style="color: #444;">?</span>';
             document.getElementById('p1-preview').classList.remove('p1-selected');
             document.getElementById('p2-preview').classList.remove('p2-selected');
+            document.getElementById('p2-preview').classList.remove('same-fighter');
             document.getElementById('p1-name').textContent = '';
             document.getElementById('p2-name').textContent = '';
             document.getElementById('p1-stats').textContent = '';
@@ -2418,7 +2446,7 @@
             const p1El = document.getElementById('fighter-p1');
             const p2El = document.getElementById('fighter-p2');
             if (p1El) p1El.style.left = gameState.p1.x + '%';
-            if (p2El) p2El.style.right = (100 - gameState.p2.x) + '%';
+            if (p2El) p2El.style.left = gameState.p2.x + '%';
         }
 
         function applyRemoteRoundEnd(msg) {
@@ -2854,6 +2882,16 @@
                 div.onclick = () => selectFighter(f);
                 roster.appendChild(div);
             });
+            const random = document.createElement('div');
+            random.className = 'roster-fighter random';
+            random.innerHTML = `
+                <div class="fighter-name">RANDOM</div>
+            `;
+            random.onclick = () => {
+                const pick = fighters[Math.floor(Math.random() * fighters.length)];
+                selectFighter(pick);
+            };
+            roster.appendChild(random);
             if (lockedRoster) {
                 lockedRoster.innerHTML = '';
                 for (let i = 0; i < 5; i++) {
@@ -2931,6 +2969,8 @@
                 });
             }
 
+            updateSameFighterTone();
+
             if (gameMode === 'online') {
                 const bothSelected = Boolean(selectedP1 && selectedP2);
                 const fightBtn = document.getElementById('fight-btn');
@@ -2945,6 +2985,18 @@
                 if (selectedP1 && selectedP2) {
                     document.getElementById('fight-btn').disabled = false;
                 }
+            }
+        }
+
+        function updateSameFighterTone() {
+            const same = selectedP1 && selectedP2 && selectedP1.id === selectedP2.id;
+            const p2Preview = document.getElementById('p2-preview');
+            const p2Fighter = document.getElementById('fighter-p2');
+            if (p2Preview) {
+                p2Preview.classList.toggle('same-fighter', Boolean(same));
+            }
+            if (p2Fighter) {
+                p2Fighter.classList.toggle('same-fighter', Boolean(same));
             }
         }
 
@@ -3040,6 +3092,7 @@
             if (gameMode === 'online') {
                 net.victoryChoice = null;
             }
+            updateSameFighterTone();
             if (!selectedStage && stages.length) {
                 selectedStage = stages[0];
             }
@@ -3317,7 +3370,9 @@
                 return { min: 0, max: 100 };
             }
             const arenaWidth = arena.clientWidth || 1;
-            const fighterWidth = Math.max(p1El.offsetWidth, p2El.offsetWidth);
+            const spriteW1 = spriteBounds.p1 ? (spriteBounds.p1.right - spriteBounds.p1.left) : 0;
+            const spriteW2 = spriteBounds.p2 ? (spriteBounds.p2.right - spriteBounds.p2.left) : 0;
+            const fighterWidth = Math.max(spriteW1, spriteW2, p1El.offsetWidth, p2El.offsetWidth);
             const widthPct = (fighterWidth / arenaWidth) * 100;
             const pad = 1.5;
             return {
@@ -3450,7 +3505,7 @@
             enforceSpacing();
 
             p1El.style.left = gameState.p1.x + '%';
-            p2El.style.right = (100 - gameState.p2.x) + '%';
+            p2El.style.left = gameState.p2.x + '%';
 
             updateFacing('p1');
             updateFacing('p2');
