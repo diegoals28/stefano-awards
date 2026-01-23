@@ -3300,7 +3300,7 @@
         function getHitRect(player) {
             const rect = getSpriteRect(player);
             if (!rect) return null;
-            const inset = 10;
+            const inset = 18;
             return {
                 left: rect.left + inset,
                 right: rect.right - inset,
@@ -3352,7 +3352,7 @@
             if (!p1Rect || !p2Rect) return;
 
             const overlap = Math.min(p1Rect.right, p2Rect.right) - Math.max(p1Rect.left, p2Rect.left);
-            const maxOverlap = 80;
+            const maxOverlap = 220;
             if (overlap > maxOverlap) {
                 const arena = document.getElementById('arena');
                 const arenaWidth = arena ? arena.clientWidth : 1;
