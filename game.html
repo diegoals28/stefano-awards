@@ -856,6 +856,16 @@
             text-transform: uppercase;
         }
 
+        .selected-stats {
+            font-size: 0.65rem;
+            color: #c7c1b3;
+            text-transform: uppercase;
+            display: grid;
+            gap: 4px;
+            min-height: 44px;
+            letter-spacing: 0.5px;
+        }
+
         .roster {
             flex: 2;
             display: grid;
@@ -1717,6 +1727,7 @@
                     <span style="color: #444;">?</span>
                 </div>
                 <div class="selected-name" id="p1-name"></div>
+                <div class="selected-stats" id="p1-stats"></div>
             </div>
 
             <div class="roster-wrap">
@@ -1733,6 +1744,7 @@
                     <span style="color: #444;">?</span>
                 </div>
                 <div class="selected-name" id="p2-name"></div>
+                <div class="selected-stats" id="p2-stats"></div>
             </div>
         </div>
         <button class="fight-btn" id="fight-btn" disabled onclick="onFightButton()">FIGHT!</button>
@@ -2069,6 +2081,8 @@
             document.getElementById('p2-preview').classList.remove('p2-selected');
             document.getElementById('p1-name').textContent = '';
             document.getElementById('p2-name').textContent = '';
+            document.getElementById('p1-stats').textContent = '';
+            document.getElementById('p2-stats').textContent = '';
             document.getElementById('fight-btn').disabled = true;
             document.getElementById('fight-btn').textContent = 'FIGHT!';
             document.getElementById('p1-label').textContent = 'PLAYER 1';
@@ -2795,7 +2809,7 @@
             });
             if (lockedRoster) {
                 lockedRoster.innerHTML = '';
-                for (let i = 0; i < 6; i++) {
+                for (let i = 0; i < 5; i++) {
                     const locked = document.createElement('div');
                     locked.className = 'roster-fighter locked';
                     locked.innerHTML = `
@@ -2831,12 +2845,22 @@
             }
         }
 
+        function formatStats(stats) {
+            if (!stats) return '';
+            return `
+                <div>POWER: ${stats.power}</div>
+                <div>SPEED: ${stats.speed}</div>
+                <div>DEFENSE: ${stats.defense}</div>
+            `;
+        }
+
         function applySelection(role, fighter, isRemote) {
             if (role === 'p1') {
                 selectedP1 = fighter;
                 document.getElementById('p1-preview').innerHTML = `<img src="${fighter.image}" alt="${fighter.name}">`;
                 document.getElementById('p1-preview').classList.add('p1-selected');
                 document.getElementById('p1-name').textContent = `${fighter.flag} ${fighter.name}`;
+                document.getElementById('p1-stats').innerHTML = formatStats(fighter.stats);
 
                 document.querySelectorAll('.roster-fighter[data-id]').forEach((el) => {
                     el.classList.toggle('selected-p1', Number(el.dataset.id) === fighter.id);
@@ -2846,6 +2870,7 @@
                 document.getElementById('p2-preview').innerHTML = `<img src="${fighter.image}" alt="${fighter.name}">`;
                 document.getElementById('p2-preview').classList.add('p2-selected');
                 document.getElementById('p2-name').textContent = `${fighter.flag} ${fighter.name}`;
+                document.getElementById('p2-stats').innerHTML = formatStats(fighter.stats);
 
                 document.querySelectorAll('.roster-fighter[data-id]').forEach((el) => {
                     const isMatch = Number(el.dataset.id) === fighter.id;
