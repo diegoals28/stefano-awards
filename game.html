@@ -3394,31 +3394,6 @@
             const p2Rect = getSpriteRect('p2');
             if (!p1Rect || !p2Rect) return;
 
-            const p1Center = (p1Rect.left + p1Rect.right) / 2;
-            const p2Center = (p2Rect.left + p2Rect.right) / 2;
-            if (p1Center > p2Center) {
-                const bounds = getArenaBounds();
-                gameState.p1.x = Math.max(bounds.min, Math.min(bounds.max, gameState.p1.x));
-                gameState.p2.x = Math.max(bounds.min, Math.min(bounds.max, gameState.p2.x));
-                return;
-            }
-
-            const overlap = Math.min(p1Rect.right, p2Rect.right) - Math.max(p1Rect.left, p2Rect.left);
-            const maxOverlap = 120;
-            const movingToward = (gameState.p1.vx > 0 && gameState.p2.vx < 0);
-            if (overlap > maxOverlap && !movingToward) {
-                const arena = document.getElementById('arena');
-                const arenaWidth = arena ? arena.clientWidth : 1;
-                const shiftPct = (overlap / arenaWidth) * 100 * 0.5;
-                if (gameState.p1.x <= gameState.p2.x) {
-                    gameState.p1.x -= shiftPct;
-                    gameState.p2.x += shiftPct;
-                } else {
-                    gameState.p1.x += shiftPct;
-                    gameState.p2.x -= shiftPct;
-                }
-            }
-
             const bounds = getArenaBounds();
             gameState.p1.x = Math.max(bounds.min, Math.min(bounds.max, gameState.p1.x));
             gameState.p2.x = Math.max(bounds.min, Math.min(bounds.max, gameState.p2.x));
