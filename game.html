@@ -270,9 +270,9 @@
         .carousel-detail {
             position: fixed;
             z-index: 20;
-            min-width: 240px;
-            max-width: 280px;
-            padding: 12px;
+            min-width: 300px;
+            max-width: 360px;
+            padding: 16px;
             border: 2px solid #2f2f3f;
             border-radius: 10px;
             background: rgba(6, 6, 12, 0.92);
@@ -288,15 +288,15 @@
 
         .detail-header {
             display: grid;
-            grid-template-columns: 64px 1fr;
-            gap: 10px;
+            grid-template-columns: 80px 1fr;
+            gap: 12px;
             align-items: center;
             margin-bottom: 8px;
         }
 
         .detail-header img {
-            width: 64px;
-            height: 80px;
+            width: 80px;
+            height: 100px;
             object-fit: cover;
             border-radius: 6px;
             border: 2px solid #2f2f3f;
@@ -305,12 +305,12 @@
 
         .detail-name {
             font-family: 'Press Start 2P', monospace;
-            font-size: 0.55rem;
+            font-size: 0.65rem;
             color: var(--neon-gold);
         }
 
         .detail-country {
-            font-size: 0.6rem;
+            font-size: 0.7rem;
             color: #b9b1a2;
             margin-top: 4px;
         }
@@ -318,14 +318,14 @@
         .detail-stats {
             display: grid;
             gap: 4px;
-            font-size: 0.6rem;
+            font-size: 0.7rem;
             color: #cfc8b8;
             text-transform: uppercase;
         }
 
         .detail-story {
             margin-top: 8px;
-            font-size: 0.6rem;
+            font-size: 0.7rem;
             line-height: 1.4;
             color: #d6cfbf;
         }
@@ -1990,6 +1990,7 @@
         ];
 
         let audioCtx = null;
+        const battleBgm = { interval: null, step: 0 };
 
         // Estado de animación de cada jugador
         let animState = {
@@ -2072,6 +2073,7 @@
 
         function backToTitle() {
             resetOnlineState();
+            stopBattleMusic();
             showScreen('title-screen');
         }
 
@@ -2661,6 +2663,46 @@
             }
         }
 
+        function playBattleNote(freq, duration, type, gainValue, startTime) {
+            if (!audioCtx || !freq) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, startTime);
+            gain.gain.setValueAtTime(0.0001, startTime);
+            gain.gain.exponentialRampToValueAtTime(gainValue, startTime + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+            osc.connect(gain).connect(audioCtx.destination);
+            osc.start(startTime);
+            osc.stop(startTime + duration + 0.05);
+        }
+
+        function startBattleMusic() {
+            ensureAudio();
+            if (battleBgm.interval) return;
+            const tempo = 150;
+            const beat = 60 / tempo;
+            const lead = [523.25, 659.25, 783.99, 659.25, 587.33, 523.25, 659.25, 0,
+                          523.25, 659.25, 783.99, 880.0, 783.99, 659.25, 587.33, 0];
+            const bass = [130.81, 0, 164.81, 0, 146.83, 0, 174.61, 0,
+                          130.81, 0, 164.81, 0, 146.83, 0, 174.61, 0];
+            battleBgm.step = 0;
+            battleBgm.interval = setInterval(() => {
+                const now = audioCtx.currentTime;
+                const idx = battleBgm.step % lead.length;
+                playBattleNote(lead[idx], beat * 0.9, 'square', 0.06, now);
+                playBattleNote(bass[idx], beat * 0.95, 'triangle', 0.05, now);
+                battleBgm.step++;
+            }, beat * 1000);
+        }
+
+        function stopBattleMusic() {
+            if (battleBgm.interval) {
+                clearInterval(battleBgm.interval);
+                battleBgm.interval = null;
+            }
+        }
+
         function playWheelSpin() {
             if (!audioCtx) return;
             const now = audioCtx.currentTime;
@@ -2991,6 +3033,7 @@
         // Iniciar batalla
         function startBattle(options = {}) {
             showScreen('battle-screen');
+            startBattleMusic();
             if (gameMode === 'online' && typeof options.matchId === 'number') {
                 net.matchId = options.matchId;
             }
@@ -3300,7 +3343,7 @@
         function getHitRect(player) {
             const rect = getSpriteRect(player);
             if (!rect) return null;
-            const inset = 18;
+            const inset = 24;
             return {
                 left: rect.left + inset,
                 right: rect.right - inset,
@@ -3351,8 +3394,17 @@
             const p2Rect = getSpriteRect('p2');
             if (!p1Rect || !p2Rect) return;
 
+            const p1Center = (p1Rect.left + p1Rect.right) / 2;
+            const p2Center = (p2Rect.left + p2Rect.right) / 2;
+            if (p1Center > p2Center) {
+                const bounds = getArenaBounds();
+                gameState.p1.x = Math.max(bounds.min, Math.min(bounds.max, gameState.p1.x));
+                gameState.p2.x = Math.max(bounds.min, Math.min(bounds.max, gameState.p2.x));
+                return;
+            }
+
             const overlap = Math.min(p1Rect.right, p2Rect.right) - Math.max(p1Rect.left, p2Rect.left);
-            const maxOverlap = 220;
+            const maxOverlap = 120;
             if (overlap > maxOverlap) {
                 const arena = document.getElementById('arena');
                 const arenaWidth = arena ? arena.clientWidth : 1;
@@ -3609,6 +3661,7 @@
 
         function showVictory(winner) {
             showScreen('victory-screen');
+            stopBattleMusic();
             if (gameMode === 'online') {
                 net.victoryChoice = null;
             }
@@ -3655,6 +3708,7 @@
 
         function backToSelect() {
             prepareSelectScreen();
+            stopBattleMusic();
             showScreen('select-screen');
             buildRoster();
         }
