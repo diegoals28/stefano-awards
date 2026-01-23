@@ -1703,7 +1703,7 @@
             }
         };
 
-        const SPRITE_VERSION = 'v5';
+        const SPRITE_VERSION = 'v6';
         const MAX_HEALTH = 150;
 
         // Supabase (votacion)
@@ -1774,6 +1774,7 @@
             airFriction: 0.3,
             minDistance: 14,
             attackRange: 23,
+            passThroughDistance: 4,
             knockbackPunch: 1.4,
             knockbackKick: 2.1
         };
@@ -2815,6 +2816,7 @@
 
             const delta = gameState.p2.x - gameState.p1.x;
             const distance = Math.abs(delta);
+            if (distance <= MOVEMENT.passThroughDistance) return;
             if (distance >= minDistance) return;
 
             const push = (minDistance - distance) / 2;
