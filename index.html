@@ -266,6 +266,59 @@
             object-fit: cover;
         }
 
+        .title-lineup {
+            width: min(980px, 92vw);
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 12px;
+            border: 3px solid #3a3a4b;
+            border-radius: 10px;
+            background: rgba(8, 8, 14, 0.75);
+            box-shadow: 0 8px 0 #0a0a12;
+        }
+
+        .title-fighter-card {
+            width: 90px;
+            height: 120px;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            border: 2px solid #2f2f3f;
+            background: #0b0b12;
+            box-shadow: 0 6px 0 #0a0a0f;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+        }
+
+        .title-fighter-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: top;
+            image-rendering: pixelated;
+        }
+
+        .title-fighter-card .title-fighter-name {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            padding: 4px;
+            font-size: 0.5rem;
+            text-align: center;
+            color: #ffe76a;
+            background: rgba(0, 0, 0, 0.8);
+            text-shadow: 1px 1px 0 #000;
+        }
+
+        .title-fighter-card:hover {
+            transform: translateY(-4px) scale(1.05);
+            box-shadow: 0 0 16px rgba(255, 230, 120, 0.6);
+            filter: brightness(1.08);
+            z-index: 5;
+        }
+
         .game-title {
             font-family: 'Press Start 2P', monospace;
             font-size: 3rem;
@@ -749,6 +802,34 @@
             border: 2px solid var(--panel-border);
             border-radius: 10px;
             box-shadow: 0 0 24px rgba(0, 0, 0, 0.6);
+        }
+
+        .roster-wrap {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .locked-section {
+            padding: 14px;
+            background: rgba(8, 8, 14, 0.65);
+            border: 2px dashed #3a3a4b;
+            border-radius: 10px;
+        }
+
+        .locked-title {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #c7b3ff;
+            margin-bottom: 8px;
+        }
+
+        .locked-roster {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
         }
 
         .roster-fighter {
@@ -1509,6 +1590,7 @@
                 <div class="carousel-card"><img src="personajes/diegolara.png" alt="Diegolara"></div>
             </div>
         </div>
+        <div class="title-lineup" id="title-lineup"></div>
         <div class="mode-buttons">
             <button class="mode-btn" onclick="startGame('pvp')">2 PLAYERS</button>
             <button class="mode-btn" onclick="startGame('cpu')">VS CPU</button>
@@ -1600,7 +1682,13 @@
                 <div class="selected-name" id="p1-name"></div>
             </div>
 
-            <div class="roster" id="roster"></div>
+            <div class="roster-wrap">
+                <div class="roster" id="roster"></div>
+                <div class="locked-section">
+                    <div class="locked-title">LOCKED FIGHTERS</div>
+                    <div class="locked-roster" id="locked-roster"></div>
+                </div>
+            </div>
 
             <div class="player-select">
                 <div class="player-label p2" id="p2-label">PLAYER 2</div>
@@ -1710,6 +1798,17 @@
               spriteBase: "sprites/diegolara", hasSprite: true, spriteOffsetX: -50,
               stats: { power: 78, speed: 82, defense: 85 } }
         ];
+
+        function buildTitleLineup() {
+            const wrap = document.getElementById('title-lineup');
+            if (!wrap) return;
+            wrap.innerHTML = fighters.map(f => `
+                <div class="title-fighter-card" title="${f.name}">
+                    <img src="${f.image}" alt="${f.name}">
+                    <div class="title-fighter-name">${f.name}</div>
+                </div>
+            `).join('');
+        }
 
         const stages = [
             {
@@ -1824,6 +1923,8 @@
         let keys = {};
         let timerInterval = null;
         let gameLoop = null;
+
+        buildTitleLineup();
 
         // Iniciar juego
         function startGame(mode) {
@@ -2415,10 +2516,12 @@
         // Construir roster
         function buildRoster() {
             const roster = document.getElementById('roster');
+            const lockedRoster = document.getElementById('locked-roster');
             roster.innerHTML = '';
             fighters.forEach(f => {
                 const div = document.createElement('div');
                 div.className = 'roster-fighter';
+                div.dataset.id = f.id;
                 div.innerHTML = `
                     <img src="${f.image}" alt="${f.name}">
                     <div class="fighter-name">${f.flag} ${f.name}</div>
@@ -2426,13 +2529,16 @@
                 div.onclick = () => selectFighter(f);
                 roster.appendChild(div);
             });
-            for (let i = 0; i < 3; i++) {
-                const locked = document.createElement('div');
-                locked.className = 'roster-fighter locked';
-                locked.innerHTML = `
-                    <div class="fighter-name">???</div>
-                `;
-                roster.appendChild(locked);
+            if (lockedRoster) {
+                lockedRoster.innerHTML = '';
+                for (let i = 0; i < 3; i++) {
+                    const locked = document.createElement('div');
+                    locked.className = 'roster-fighter locked';
+                    locked.innerHTML = `
+                        <div class="fighter-name">???</div>
+                    `;
+                    lockedRoster.appendChild(locked);
+                }
             }
         }
 
@@ -2468,8 +2574,8 @@
                 document.getElementById('p1-preview').classList.add('p1-selected');
                 document.getElementById('p1-name').textContent = `${fighter.flag} ${fighter.name}`;
 
-                document.querySelectorAll('.roster-fighter').forEach((el, i) => {
-                    el.classList.toggle('selected-p1', fighters[i].id === fighter.id);
+                document.querySelectorAll('.roster-fighter[data-id]').forEach((el) => {
+                    el.classList.toggle('selected-p1', Number(el.dataset.id) === fighter.id);
                 });
             } else {
                 selectedP2 = fighter;
@@ -2477,10 +2583,9 @@
                 document.getElementById('p2-preview').classList.add('p2-selected');
                 document.getElementById('p2-name').textContent = `${fighter.flag} ${fighter.name}`;
 
-                document.querySelectorAll('.roster-fighter').forEach((el, i) => {
-                    if (fighters[i].id === fighter.id && !el.classList.contains('selected-p1')) {
-                        el.classList.add('selected-p2');
-                    }
+                document.querySelectorAll('.roster-fighter[data-id]').forEach((el) => {
+                    const isMatch = Number(el.dataset.id) === fighter.id;
+                    el.classList.toggle('selected-p2', isMatch && !el.classList.contains('selected-p1'));
                 });
             }
 
