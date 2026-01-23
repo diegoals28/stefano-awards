@@ -1829,7 +1829,7 @@
             }
         };
 
-        const SPRITE_VERSION = 'v8';
+        const SPRITE_VERSION = 'v9';
         const MAX_HEALTH = 150;
 
         // Supabase (votacion)
@@ -1850,7 +1850,8 @@
             socket: null,
             pc: null,
             dc: null,
-            connected: false
+            connected: false,
+            offerSent: false
         };
 
         const VOTE_OUTCOMES = [
@@ -2016,7 +2017,8 @@
                 socket: null,
                 pc: null,
                 dc: null,
-                connected: false
+                connected: false,
+                offerSent: false
             };
         }
 
@@ -2026,7 +2028,11 @@
                 setOnlineStatus('Connected to signaling');
                 sendSignal({ type: 'join', room: net.roomId });
                 if (net.isHost) {
-                    startHostPeer();
+                    setOnlineStatus('Waiting for opponent...');
+                } else {
+                    setTimeout(() => {
+                        sendSignal({ type: 'ready', room: net.roomId });
+                    }, 100);
                 }
             };
             net.socket.onmessage = async (event) => {
@@ -2036,10 +2042,18 @@
                 } catch (e) {
                     return;
                 }
+                if (msg.type === 'ready' && net.isHost && !net.offerSent) {
+                    net.offerSent = true;
+                    startHostPeer();
+                    return;
+                }
                 await handleSignal(msg);
             };
             net.socket.onclose = () => {
                 setOnlineStatus('Disconnected');
+            };
+            net.socket.onerror = () => {
+                setOnlineStatus('Signaling error');
             };
         }
 
