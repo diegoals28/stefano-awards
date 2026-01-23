@@ -3405,7 +3405,8 @@
 
             const overlap = Math.min(p1Rect.right, p2Rect.right) - Math.max(p1Rect.left, p2Rect.left);
             const maxOverlap = 120;
-            if (overlap > maxOverlap) {
+            const movingToward = (gameState.p1.vx > 0 && gameState.p2.vx < 0);
+            if (overlap > maxOverlap && !movingToward) {
                 const arena = document.getElementById('arena');
                 const arenaWidth = arena ? arena.clientWidth : 1;
                 const shiftPct = (overlap / arenaWidth) * 100 * 0.5;
