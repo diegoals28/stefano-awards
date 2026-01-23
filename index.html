@@ -3291,6 +3291,18 @@
             };
         }
 
+        function getHitRect(player) {
+            const rect = getSpriteRect(player);
+            if (!rect) return null;
+            const inset = 10;
+            return {
+                left: rect.left + inset,
+                right: rect.right - inset,
+                top: rect.top + inset,
+                bottom: rect.bottom - inset
+            };
+        }
+
         function applyMovement(player, axis) {
             const state = gameState[player];
             const fighter = player === 'p1' ? selectedP1 : selectedP2;
@@ -3334,7 +3346,8 @@
             if (!p1Rect || !p2Rect) return;
 
             const overlap = Math.min(p1Rect.right, p2Rect.right) - Math.max(p1Rect.left, p2Rect.left);
-            if (overlap > 0) {
+            const maxOverlap = 18;
+            if (overlap > maxOverlap) {
                 const arena = document.getElementById('arena');
                 const arenaWidth = arena ? arena.clientWidth : 1;
                 const shiftPct = (overlap / arenaWidth) * 100 * 0.5;
@@ -3491,8 +3504,8 @@
         }
 
         function isHitInRange(attacker, defender) {
-            const aRect = getSpriteRect(attacker);
-            const dRect = getSpriteRect(defender);
+            const aRect = getHitRect(attacker);
+            const dRect = getHitRect(defender);
             if (!aRect || !dRect) return false;
             return aRect.right >= dRect.left && aRect.left <= dRect.right;
         }
