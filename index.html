@@ -1699,6 +1699,7 @@
             </div>
         </div>
         <button class="fight-btn" id="fight-btn" disabled onclick="onFightButton()">FIGHT!</button>
+        <button class="rematch-btn" onclick="backToTitle()">BACK</button>
     </div>
 
     <!-- SELECCION DE ESCENA -->
@@ -2993,9 +2994,6 @@
             const p1El = document.getElementById('fighter-p1');
             const p2El = document.getElementById('fighter-p2');
 
-            updateFacing('p1');
-            updateFacing('p2');
-
             const p1Axis = (keys['d'] || keys['D'] ? 1 : 0) + (keys['a'] || keys['A'] ? -1 : 0);
             applyMovement('p1', p1Axis);
 
@@ -3044,6 +3042,9 @@
 
             p1El.style.left = gameState.p1.x + '%';
             p2El.style.right = (100 - gameState.p2.x) + '%';
+
+            updateFacing('p1');
+            updateFacing('p2');
 
             determineAnimation('p1');
             determineAnimation('p2');
