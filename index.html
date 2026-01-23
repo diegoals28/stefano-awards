@@ -1851,7 +1851,8 @@
             pc: null,
             dc: null,
             connected: false,
-            offerSent: false
+            offerSent: false,
+            readyInterval: null
         };
 
         const VOTE_OUTCOMES = [
@@ -2010,6 +2011,9 @@
             if (net.pc) {
                 net.pc.close();
             }
+            if (net.readyInterval) {
+                clearInterval(net.readyInterval);
+            }
             net = {
                 enabled: false,
                 isHost: false,
@@ -2018,7 +2022,8 @@
                 pc: null,
                 dc: null,
                 connected: false,
-                offerSent: false
+                offerSent: false,
+                readyInterval: null
             };
         }
 
@@ -2027,19 +2032,20 @@
             net.socket.onopen = () => {
                 setOnlineStatus('Connected to signaling');
                 sendSignal({ type: 'join', room: net.roomId });
-                if (net.isHost) {
-                    setOnlineStatus('Waiting for opponent...');
-                } else {
-                    setTimeout(() => {
-                        sendSignal({ type: 'ready', room: net.roomId });
-                    }, 100);
-                }
             };
             net.socket.onmessage = async (event) => {
                 let msg = null;
                 try {
                     msg = JSON.parse(event.data);
                 } catch (e) {
+                    return;
+                }
+                if (msg.type === 'joined') {
+                    if (net.isHost) {
+                        setOnlineStatus('Waiting for opponent...');
+                    } else {
+                        sendReadySignal();
+                    }
                     return;
                 }
                 if (msg.type === 'ready' && net.isHost && !net.offerSent) {
@@ -2055,6 +2061,22 @@
             net.socket.onerror = () => {
                 setOnlineStatus('Signaling error');
             };
+        }
+
+        function sendReadySignal() {
+            sendSignal({ type: 'ready', room: net.roomId });
+            if (!net.readyInterval) {
+                let tries = 0;
+                net.readyInterval = setInterval(() => {
+                    if (net.connected || tries >= 5) {
+                        clearInterval(net.readyInterval);
+                        net.readyInterval = null;
+                        return;
+                    }
+                    sendSignal({ type: 'ready', room: net.roomId });
+                    tries++;
+                }, 1000);
+            }
         }
 
         function sendSignal(msg) {
@@ -2783,7 +2805,7 @@
         // Sistema de animación de sprites (sprite sheet con coordenadas)
         function setAnimation(player, animName) {
             const fighter = player === 'p1' ? selectedP1 : selectedP2;
-            if (!fighter.hasSprite || !fighter.spriteBase) return;
+            if (!fighter || !fighter.hasSprite || !fighter.spriteBase) return;
 
             const state = animState[player];
 
@@ -3075,6 +3097,7 @@
             const attackerFighter = attacker === 'p1' ? selectedP1 : selectedP2;
             const defenderFighter = defender === 'p1' ? selectedP1 : selectedP2;
 
+            if (!attackerFighter || !defenderFighter) return;
             if (!attackerState.canAttack) return;
 
             attackerState.canAttack = false;
