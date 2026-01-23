@@ -1774,7 +1774,6 @@
             airFriction: 0.3,
             minDistance: 14,
             attackRange: 23,
-            passThroughDistance: 4,
             knockbackPunch: 1.4,
             knockbackKick: 2.1
         };
@@ -2816,13 +2815,22 @@
 
             const delta = gameState.p2.x - gameState.p1.x;
             const distance = Math.abs(delta);
-            if (distance <= MOVEMENT.passThroughDistance) return;
             if (distance >= minDistance) return;
 
-            const push = (minDistance - distance) / 2;
-            const direction = delta >= 0 ? 1 : -1;
-            gameState.p1.x -= push * direction;
-            gameState.p2.x += push * direction;
+            const approaching = (gameState.p1.vx > 0 && gameState.p2.vx < 0 && delta > 0) ||
+                (gameState.p1.vx < 0 && gameState.p2.vx > 0 && delta < 0);
+
+            if (approaching) {
+                const mid = (gameState.p1.x + gameState.p2.x) / 2;
+                const offset = minDistance / 2;
+                gameState.p1.x = mid + offset * (delta > 0 ? 1 : -1);
+                gameState.p2.x = mid - offset * (delta > 0 ? 1 : -1);
+            } else {
+                const push = (minDistance - distance) / 2;
+                const direction = delta >= 0 ? 1 : -1;
+                gameState.p1.x -= push * direction;
+                gameState.p2.x += push * direction;
+            }
 
             gameState.p1.vx = 0;
             gameState.p2.vx = 0;
