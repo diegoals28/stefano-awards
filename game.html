@@ -1852,7 +1852,8 @@
             dc: null,
             connected: false,
             offerSent: false,
-            readyInterval: null
+            readyInterval: null,
+            retryCount: 0
         };
 
         const VOTE_OUTCOMES = [
@@ -2023,13 +2024,15 @@
                 dc: null,
                 connected: false,
                 offerSent: false,
-                readyInterval: null
+                readyInterval: null,
+                retryCount: 0
             };
         }
 
         function connectSignaling() {
             net.socket = new WebSocket(SIGNALING_URL);
             net.socket.onopen = () => {
+                net.retryCount = 0;
                 setOnlineStatus('Connected to signaling');
                 sendSignal({ type: 'join', room: net.roomId });
             };
@@ -2057,10 +2060,27 @@
             };
             net.socket.onclose = () => {
                 setOnlineStatus('Disconnected');
+                scheduleReconnect();
             };
             net.socket.onerror = () => {
                 setOnlineStatus('Signaling error');
             };
+        }
+
+        function scheduleReconnect() {
+            if (!net.enabled || net.connected) return;
+            if (net.retryCount >= 5) {
+                setOnlineStatus('Disconnected (retry limit)');
+                return;
+            }
+            const delay = 1000 * Math.min(5, net.retryCount + 1);
+            net.retryCount++;
+            setOnlineStatus(`Reconnecting... (${net.retryCount})`);
+            setTimeout(() => {
+                if (net.enabled && !net.connected) {
+                    connectSignaling();
+                }
+            }, delay);
         }
 
         function sendReadySignal() {
