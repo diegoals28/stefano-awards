@@ -1855,7 +1855,8 @@
             readyInterval: null,
             retryCount: 0,
             pingInterval: null,
-            stateInterval: null
+            stateInterval: null,
+            matchId: 0
         };
 
         const VOTE_OUTCOMES = [
@@ -2035,7 +2036,8 @@
                 readyInterval: null,
                 retryCount: 0,
                 pingInterval: null,
-                stateInterval: null
+                stateInterval: null,
+                matchId: 0
             };
         }
 
@@ -2224,7 +2226,10 @@
                 }
             }
             if (msg.type === 'start') {
-                startBattle();
+                if (typeof msg.matchId === 'number') {
+                    net.matchId = msg.matchId;
+                }
+                startBattle({ matchId: net.matchId });
             }
             if (msg.type === 'key') {
                 keys[msg.key] = msg.down;
@@ -2253,6 +2258,7 @@
 
         function applyRemoteState(msg) {
             if (net.isHost || gameMode !== 'online') return;
+            if (typeof msg.matchId === 'number' && msg.matchId !== net.matchId) return;
             if (typeof msg.p1Health === 'number') {
                 gameState.p1.health = Math.max(0, msg.p1Health);
             }
@@ -2278,6 +2284,7 @@
         }
 
         function applyRemoteRoundEnd(msg) {
+            if (typeof msg.matchId === 'number' && msg.matchId !== net.matchId) return;
             gameState.paused = true;
             clearInterval(timerInterval);
             clearInterval(gameLoop);
@@ -2803,9 +2810,10 @@
             if (!selectedStage) return;
             if (gameMode === 'online') {
                 if (!net.isHost) return;
-                sendDataMessage({ type: 'start' });
+                net.matchId = (net.matchId || 0) + 1;
+                sendDataMessage({ type: 'start', matchId: net.matchId });
             }
-            startBattle();
+            startBattle({ matchId: net.matchId });
         }
 
         function applyStageBackground() {
@@ -2828,8 +2836,11 @@
         }
 
         // Iniciar batalla
-        function startBattle() {
+        function startBattle(options = {}) {
             showScreen('battle-screen');
+            if (gameMode === 'online' && typeof options.matchId === 'number') {
+                net.matchId = options.matchId;
+            }
             if (!selectedStage && stages.length) {
                 selectedStage = stages[0];
             }
@@ -2922,7 +2933,8 @@
                         p2Health: gameState.p2.health,
                         p1x: gameState.p1.x,
                         p2x: gameState.p2.x,
-                        timer: gameState.timer
+                        timer: gameState.timer,
+                        matchId: net.matchId
                     });
                 }, 150);
             }
@@ -3374,7 +3386,8 @@
                     type: 'round_end',
                     winnerPlayer: winner.player,
                     p1Health: gameState.p1.health,
-                    p2Health: gameState.p2.health
+                    p2Health: gameState.p2.health,
+                    matchId: net.matchId
                 });
             }
 
@@ -3403,7 +3416,15 @@
         }
 
         function rematch() {
-            startBattle();
+            if (gameMode === 'online') {
+                if (!net.isHost) {
+                    setOnlineStatus('Waiting for host...');
+                    return;
+                }
+                net.matchId = (net.matchId || 0) + 1;
+                sendDataMessage({ type: 'start', matchId: net.matchId });
+            }
+            startBattle({ matchId: net.matchId });
         }
 
         function backToSelect() {
