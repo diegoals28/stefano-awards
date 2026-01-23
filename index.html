@@ -2825,6 +2825,12 @@
             }
         }
 
+        function getCpuFighter(excludeId) {
+            const options = fighters.filter(f => f.id !== excludeId);
+            if (!options.length) return fighters[0];
+            return options[Math.floor(Math.random() * options.length)];
+        }
+
         // Seleccionar personaje
         function selectFighter(fighter) {
             if (gameMode === 'online') {
@@ -2841,7 +2847,7 @@
                 if (gameMode === 'cpu') {
                     // CPU selecciona aleatorio
                     setTimeout(() => {
-                        const cpuFighter = fighters[Math.floor(Math.random() * fighters.length)];
+                        const cpuFighter = getCpuFighter(fighter.id);
                         applySelection('p2', cpuFighter, true);
                     }, 500);
                 }
@@ -3346,7 +3352,7 @@
             if (!p1Rect || !p2Rect) return;
 
             const overlap = Math.min(p1Rect.right, p2Rect.right) - Math.max(p1Rect.left, p2Rect.left);
-            const maxOverlap = 18;
+            const maxOverlap = 80;
             if (overlap > maxOverlap) {
                 const arena = document.getElementById('arena');
                 const arenaWidth = arena ? arena.clientWidth : 1;
