@@ -1328,7 +1328,7 @@
 
         @keyframes jump {
             0%, 100% { bottom: 100px; }
-            50% { bottom: 250px; }
+            50% { bottom: 320px; }
         }
 
         @keyframes drift-slow {
@@ -1853,7 +1853,9 @@
             connected: false,
             offerSent: false,
             readyInterval: null,
-            retryCount: 0
+            retryCount: 0,
+            pingInterval: null,
+            stateInterval: null
         };
 
         const VOTE_OUTCOMES = [
@@ -2015,6 +2017,12 @@
             if (net.readyInterval) {
                 clearInterval(net.readyInterval);
             }
+            if (net.pingInterval) {
+                clearInterval(net.pingInterval);
+            }
+            if (net.stateInterval) {
+                clearInterval(net.stateInterval);
+            }
             net = {
                 enabled: false,
                 isHost: false,
@@ -2025,7 +2033,9 @@
                 connected: false,
                 offerSent: false,
                 readyInterval: null,
-                retryCount: 0
+                retryCount: 0,
+                pingInterval: null,
+                stateInterval: null
             };
         }
 
@@ -2035,6 +2045,11 @@
                 net.retryCount = 0;
                 setOnlineStatus('Connected to signaling');
                 sendSignal({ type: 'join', room: net.roomId });
+                if (!net.pingInterval) {
+                    net.pingInterval = setInterval(() => {
+                        sendSignal({ type: 'ping' });
+                    }, 15000);
+                }
             };
             net.socket.onmessage = async (event) => {
                 let msg = null;
@@ -2058,8 +2073,12 @@
                 }
                 await handleSignal(msg);
             };
-            net.socket.onclose = () => {
-                setOnlineStatus('Disconnected');
+            net.socket.onclose = (event) => {
+                setOnlineStatus(`Disconnected (code ${event.code || 0})`);
+                if (net.pingInterval) {
+                    clearInterval(net.pingInterval);
+                    net.pingInterval = null;
+                }
                 scheduleReconnect();
             };
             net.socket.onerror = () => {
@@ -2189,6 +2208,12 @@
                     applySelection(msg.role, fighter, true);
                 }
             }
+            if (msg.type === 'round_end') {
+                applyRemoteRoundEnd(msg);
+            }
+            if (msg.type === 'state') {
+                applyRemoteState(msg);
+            }
             if (msg.type === 'stage-open') {
                 showStageScreen();
             }
@@ -2224,6 +2249,71 @@
             prepareSelectScreen();
             showScreen('select-screen');
             buildRoster();
+        }
+
+        function applyRemoteState(msg) {
+            if (net.isHost || gameMode !== 'online') return;
+            if (typeof msg.p1Health === 'number') {
+                gameState.p1.health = Math.max(0, msg.p1Health);
+            }
+            if (typeof msg.p2Health === 'number') {
+                gameState.p2.health = Math.max(0, msg.p2Health);
+            }
+            if (typeof msg.p1x === 'number') {
+                gameState.p1.x = msg.p1x;
+            }
+            if (typeof msg.p2x === 'number') {
+                gameState.p2.x = msg.p2x;
+            }
+            if (typeof msg.timer === 'number') {
+                gameState.timer = msg.timer;
+                const timerEl = document.getElementById('timer');
+                if (timerEl) timerEl.textContent = gameState.timer;
+            }
+            updateHealthBars();
+            const p1El = document.getElementById('fighter-p1');
+            const p2El = document.getElementById('fighter-p2');
+            if (p1El) p1El.style.left = gameState.p1.x + '%';
+            if (p2El) p2El.style.right = (100 - gameState.p2.x) + '%';
+        }
+
+        function applyRemoteRoundEnd(msg) {
+            gameState.paused = true;
+            clearInterval(timerInterval);
+            clearInterval(gameLoop);
+            if (net.stateInterval) {
+                clearInterval(net.stateInterval);
+                net.stateInterval = null;
+            }
+
+            if (typeof msg.p1Health === 'number') {
+                gameState.p1.health = Math.max(0, msg.p1Health);
+            }
+            if (typeof msg.p2Health === 'number') {
+                gameState.p2.health = Math.max(0, msg.p2Health);
+            }
+            updateHealthBars();
+
+            let winner;
+            if (msg.winnerPlayer === 'p1') {
+                winner = { player: 'p1', fighter: selectedP1 };
+            } else if (msg.winnerPlayer === 'p2') {
+                winner = { player: 'p2', fighter: selectedP2 };
+            } else {
+                winner = { player: 'draw', fighter: null };
+            }
+
+            setTimeout(() => {
+                if (winner.player !== 'draw') {
+                    showAnnounce(`${winner.fighter.name} WINS!`);
+                } else {
+                    showAnnounce('DRAW!');
+                }
+
+                setTimeout(() => {
+                    showVictory(winner);
+                }, 2000);
+            }, 500);
         }
 
         function isLocalOnlineKey(key) {
@@ -2800,15 +2890,17 @@
 
         function startRound() {
             // Timer
-            timerInterval = setInterval(() => {
-                if (!gameState.paused) {
-                    gameState.timer--;
-                    document.getElementById('timer').textContent = gameState.timer;
-                    if (gameState.timer <= 0) {
-                        endRound();
+            if (!(gameMode === 'online' && !net.isHost)) {
+                timerInterval = setInterval(() => {
+                    if (!gameState.paused) {
+                        gameState.timer--;
+                        document.getElementById('timer').textContent = gameState.timer;
+                        if (gameState.timer <= 0) {
+                            endRound();
+                        }
                     }
-                }
-            }, 1000);
+                }, 1000);
+            }
 
             // Game loop
             gameLoop = setInterval(() => {
@@ -2820,6 +2912,20 @@
                     }
                 }
             }, 1000 / 60);
+
+            if (gameMode === 'online' && net.isHost && net.connected) {
+                if (net.stateInterval) clearInterval(net.stateInterval);
+                net.stateInterval = setInterval(() => {
+                    sendDataMessage({
+                        type: 'state',
+                        p1Health: gameState.p1.health,
+                        p2Health: gameState.p2.health,
+                        p1x: gameState.p1.x,
+                        p2x: gameState.p2.x,
+                        timer: gameState.timer
+                    });
+                }, 150);
+            }
         }
 
         // Sistema de animación de sprites (sprite sheet con coordenadas)
@@ -3132,6 +3238,10 @@
                 attackerState.canAttack = true;
             }, 300);
 
+            if (gameMode === 'online' && !net.isHost) {
+                return;
+            }
+
             // Verificar distancia real (pixel) para evitar golpes desde lejos
             if (isHitInRange(attacker, defender, type)) {
                 // Calcular daño
@@ -3239,9 +3349,16 @@
         }
 
         function endRound() {
+            if (gameMode === 'online' && !net.isHost) {
+                return;
+            }
             gameState.paused = true;
             clearInterval(timerInterval);
             clearInterval(gameLoop);
+            if (net.stateInterval) {
+                clearInterval(net.stateInterval);
+                net.stateInterval = null;
+            }
 
             let winner;
             if (gameState.p1.health > gameState.p2.health) {
@@ -3250,6 +3367,15 @@
                 winner = { player: 'p2', fighter: selectedP2 };
             } else {
                 winner = { player: 'draw', fighter: null };
+            }
+
+            if (gameMode === 'online' && net.isHost && net.connected) {
+                sendDataMessage({
+                    type: 'round_end',
+                    winnerPlayer: winner.player,
+                    p1Health: gameState.p1.health,
+                    p2Health: gameState.p2.health
+                });
             }
 
             setTimeout(() => {
