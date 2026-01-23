@@ -828,7 +828,7 @@
 
         .locked-roster {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(5, 1fr);
             gap: 10px;
         }
 
@@ -1277,21 +1277,14 @@
 
         .fighter.hit .fighter-sprite {
             animation: hit 0.3s ease;
-            filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.8)) brightness(2);
         }
 
-        .fighter.hit::after {
-            content: "";
-            position: absolute;
-            inset: 6px;
-            border: 3px solid rgba(255, 255, 255, 0.9);
-            box-shadow:
-                0 0 10px rgba(255, 255, 255, 0.8),
-                0 0 22px rgba(255, 200, 80, 0.9),
-                0 0 40px rgba(255, 110, 0, 0.85);
-            opacity: 0;
-            animation: hit-flare 0.2s ease;
-            pointer-events: none;
+        .fighter.hit .fighter-canvas {
+            filter:
+                drop-shadow(0 5px 15px rgba(0, 0, 0, 0.8))
+                drop-shadow(0 0 6px rgba(255, 230, 120, 0.9))
+                drop-shadow(0 0 16px rgba(255, 170, 40, 0.9))
+                brightness(1.15);
         }
 
         .fighter.blocking .fighter-sprite {
@@ -3082,10 +3075,8 @@
                 attackerState.canAttack = true;
             }, 300);
 
-            // Verificar distancia
-            const distance = Math.abs(gameState.p1.x - gameState.p2.x);
-            const reach = type === 'kick' ? MOVEMENT.attackRange + 6 : MOVEMENT.attackRange;
-            if (distance <= reach) {
+            // Verificar distancia real (pixel) para evitar golpes desde lejos
+            if (isHitInRange(attacker, defender, type)) {
                 // Calcular daño
                 let baseDamage = type === 'punch' ? 8 : 12;
                 let damage = baseDamage * (attackerFighter.stats.power / 100);
@@ -3123,6 +3114,24 @@
                     }
                 }
             }
+        }
+
+        function isHitInRange(attacker, defender, type) {
+            const distance = Math.abs(gameState.p1.x - gameState.p2.x);
+            if (distance > MOVEMENT.attackRange * 1.3) return false;
+
+            const attackerEl = document.getElementById(`fighter-${attacker}`);
+            const defenderEl = document.getElementById(`fighter-${defender}`);
+            if (!attackerEl || !defenderEl) return false;
+
+            const aRect = attackerEl.getBoundingClientRect();
+            const dRect = defenderEl.getBoundingClientRect();
+            const reachPx = type === 'kick' ? 48 : 32;
+
+            if (aRect.left <= dRect.left) {
+                return aRect.right + reachPx >= dRect.left;
+            }
+            return dRect.right + reachPx >= aRect.left;
         }
 
         function applyKnockback(attacker, defender, force) {
