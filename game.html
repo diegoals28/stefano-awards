@@ -2061,7 +2061,7 @@
             id: 10, name: "ALBERTO", country: "Italia", flag: "🇮🇹",
             image: "personajes/alberto.png",
             spriteBase: "sprites/alberto",
-            hasSprite: true, spriteOffsetX: 0, isBoss: true,
+            hasSprite: true, spriteOffsetX: 0, spriteScale: 0.85, isBoss: true,
             stats: { power: 95, speed: 88, defense: 95 },
             story: "El jefe final. Filosofo, maestro y estratega. Su calma esconde un poder devastador."
         };
@@ -3503,7 +3503,8 @@
             const srcH = SPRITE_CONFIG.height;
 
             // Escala consistente para evitar que animaciones anchas (patada) se encojan
-            const scale = (canvas.height / srcH) * 0.98;
+            const fighterScale = fighter.spriteScale || 1;
+            const scale = (canvas.height / srcH) * 0.98 * fighterScale;
             const destW = srcW * scale;
             const destH = srcH * scale;
             const offsetX = fighter.spriteOffsetX || 0;
