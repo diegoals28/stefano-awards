@@ -1553,6 +1553,143 @@
             z-index: 100;
         }
 
+        /* ============ MODO ARCADE ============ */
+        .arcade-progress-panel {
+            display: flex;
+            gap: 40px;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 30px;
+        }
+
+        .arcade-player-card {
+            text-align: center;
+            min-width: 180px;
+        }
+
+        .arcade-player-card img {
+            width: 160px;
+            height: 220px;
+            object-fit: cover;
+            border: 3px solid var(--neon-gold);
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(255, 204, 0, 0.4);
+        }
+
+        .arcade-player-card .arcade-player-name {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.8rem;
+            color: var(--neon-gold);
+            margin-top: 10px;
+        }
+
+        .arcade-player-card .arcade-win-count {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.65rem;
+            color: var(--neon-cyan);
+            margin-top: 6px;
+        }
+
+        .arcade-ladder {
+            display: flex;
+            flex-direction: column-reverse;
+            gap: 6px;
+            min-width: 260px;
+        }
+
+        .arcade-ladder-step {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 14px;
+            background: rgba(20, 20, 35, 0.7);
+            border: 2px solid #2a2a3a;
+            border-radius: 6px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.55rem;
+            color: #666;
+            transition: all 0.3s ease;
+        }
+
+        .arcade-ladder-step .step-number {
+            color: #555;
+            min-width: 24px;
+        }
+
+        .arcade-ladder-step .step-name {
+            flex: 1;
+        }
+
+        .arcade-ladder-step .step-status {
+            font-size: 0.5rem;
+        }
+
+        .arcade-ladder-step.current {
+            border-color: var(--neon-cyan);
+            color: #fff;
+            background: rgba(27, 213, 255, 0.1);
+            box-shadow: 0 0 12px rgba(27, 213, 255, 0.3);
+        }
+
+        .arcade-ladder-step.defeated {
+            border-color: var(--neon-green);
+            color: var(--neon-green);
+            opacity: 0.7;
+        }
+
+        .arcade-ladder-step.boss {
+            border-color: var(--neon-gold);
+            background: rgba(255, 204, 0, 0.08);
+        }
+
+        .arcade-ladder-step.boss.current {
+            box-shadow: 0 0 18px rgba(255, 204, 0, 0.5);
+            color: var(--neon-gold);
+        }
+
+        .fighter.p2.boss-fighter canvas {
+            filter: hue-rotate(40deg) brightness(1.15);
+        }
+
+        .roster-fighter.unlocked-boss {
+            border: 2px solid var(--neon-gold) !important;
+            box-shadow: 0 0 14px rgba(255, 204, 0, 0.4);
+            position: relative;
+        }
+
+        .roster-fighter.unlocked-boss::after {
+            content: "BOSS";
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.4rem;
+            background: var(--neon-gold);
+            color: #000;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        @keyframes arcade-glow {
+            0%, 100% { box-shadow: 0 0 15px rgba(255, 204, 0, 0.4); }
+            50% { box-shadow: 0 0 35px rgba(255, 204, 0, 0.8), 0 0 60px rgba(255, 120, 0, 0.4); }
+        }
+
+        .arcade-glow {
+            animation: arcade-glow 1.5s ease-in-out infinite;
+        }
+
+        #arcade-screen {
+            background: radial-gradient(ellipse at center, rgba(10, 15, 30, 0.9) 0%, rgba(0, 0, 0, 0.95) 70%);
+        }
+
+        #arcade-victory-buttons,
+        #arcade-defeat-buttons,
+        #arcade-complete-buttons,
+        #arcade-victory-info {
+            display: none;
+        }
+
         /* ============ PANTALLA VICTORIA ============ */
         #victory-screen {
             background: radial-gradient(ellipse at center, rgba(30, 25, 10, 0.8) 0%, rgba(0, 0, 0, 0.9) 70%);
@@ -1667,6 +1804,7 @@
         <div class="mode-buttons">
             <button class="mode-btn" onclick="startGame('pvp')">2 PLAYERS</button>
             <button class="mode-btn" onclick="startGame('cpu')">VS CPU</button>
+            <button class="mode-btn" onclick="startGame('arcade')">ARCADE</button>
             <button class="mode-btn" onclick="startGame('online')">ONLINE</button>
             <button class="mode-btn" onclick="showVoteScreen()">VOTE</button>
         </div>
@@ -1787,6 +1925,23 @@
         </div>
     </div>
 
+    <!-- PANTALLA ARCADE PROGRESO -->
+    <div id="arcade-screen" class="screen">
+        <h2 class="select-title">ARCADE MODE</h2>
+        <div class="arcade-progress-panel">
+            <div class="arcade-player-card">
+                <img id="arcade-player-img" src="" alt="">
+                <div class="arcade-player-name" id="arcade-player-name"></div>
+                <div class="arcade-win-count" id="arcade-win-count">WINS: 0 / 9</div>
+            </div>
+            <div class="arcade-ladder" id="arcade-ladder"></div>
+        </div>
+        <div style="display:flex; gap:15px; margin-top:20px;">
+            <button class="rematch-btn" id="arcade-next-btn" onclick="arcadeNextFight()">NEXT FIGHT</button>
+            <button class="rematch-btn" onclick="arcadeQuit()">QUIT ARCADE</button>
+        </div>
+    </div>
+
     <!-- ARENA DE COMBATE -->
     <div id="battle-screen" class="screen">
         <div class="battle-hud">
@@ -1833,14 +1988,30 @@
 
     <!-- PANTALLA VICTORIA -->
     <div id="victory-screen" class="screen">
-        <h1 class="victory-text">VICTORY!</h1>
+        <h1 class="victory-text" id="victory-title">VICTORY!</h1>
         <div class="winner-display">
             <img class="winner-image" id="winner-image" src="" alt="">
             <div class="winner-name" id="winner-name"></div>
         </div>
-        <button class="rematch-btn" onclick="chooseVictoryAction('rematch')">REMATCH</button>
-        <button class="rematch-btn" onclick="chooseVictoryAction('select')">CHARACTER SELECT</button>
-        <button class="rematch-btn" onclick="chooseVictoryAction('title')">EXIT TO MAIN MENU</button>
+        <div id="arcade-victory-info">
+            <div class="arcade-win-count" id="arcade-fight-count" style="margin-top:15px;"></div>
+        </div>
+        <div id="normal-victory-buttons">
+            <button class="rematch-btn" onclick="chooseVictoryAction('rematch')">REMATCH</button>
+            <button class="rematch-btn" onclick="chooseVictoryAction('select')">CHARACTER SELECT</button>
+            <button class="rematch-btn" onclick="chooseVictoryAction('title')">EXIT TO MAIN MENU</button>
+        </div>
+        <div id="arcade-victory-buttons">
+            <button class="rematch-btn arcade-glow" onclick="arcadeContinue()">CONTINUE</button>
+            <button class="rematch-btn" onclick="arcadeQuit()">QUIT ARCADE</button>
+        </div>
+        <div id="arcade-defeat-buttons">
+            <button class="rematch-btn" onclick="arcadeRetry()">RETRY FIGHT</button>
+            <button class="rematch-btn" onclick="arcadeQuit()">QUIT ARCADE</button>
+        </div>
+        <div id="arcade-complete-buttons">
+            <button class="rematch-btn arcade-glow" onclick="arcadeQuit()">RETURN TO MENU</button>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
@@ -1884,6 +2055,26 @@
               stats: { power: 78, speed: 82, defense: 85 },
               story: "Táctico y resistente; espera el error y castiga sin ruido." }
         ];
+
+        // Alberto - Boss del modo Arcade
+        const ALBERTO_FIGHTER = {
+            id: 10, name: "ALBERTO", country: "Italia", flag: "🇮🇹",
+            image: "personajes/pedro.png",
+            spriteBase: "sprites/pedro",
+            hasSprite: true, spriteOffsetX: 0, isBoss: true,
+            stats: { power: 95, speed: 88, defense: 95 },
+            story: "El jefe final. Filosofo, maestro y estratega. Su calma esconde un poder devastador."
+        };
+        const UNLOCK_KEY = 'enroma_unlocked_alberto';
+
+        function loadUnlocks() {
+            if (localStorage.getItem(UNLOCK_KEY) === '1') {
+                if (!fighters.find(f => f.id === ALBERTO_FIGHTER.id)) {
+                    fighters.push(ALBERTO_FIGHTER);
+                }
+            }
+        }
+        loadUnlocks();
 
         function buildCarousel() {
             const track = document.getElementById('carousel-track');
@@ -2066,6 +2257,11 @@
         let cpuInput = { move: 0, block: false };
         let spriteBounds = { p1: null, p2: null };
 
+        let arcadeState = {
+            active: false, playerFighter: null, opponents: [],
+            currentIndex: 0, victories: [], difficulty: 0, completed: false
+        };
+
         let gameState = {
             p1: { health: MAX_HEALTH, x: 15, vx: 0, jumping: false, crouching: false, blocking: false, canAttack: true },
             p2: { health: MAX_HEALTH, x: 85, vx: 0, jumping: false, crouching: false, blocking: false, canAttack: true },
@@ -2084,6 +2280,13 @@
             gameMode = mode;
             if (mode === 'online') {
                 showScreen('online-screen');
+                return;
+            }
+            if (mode === 'arcade') {
+                document.getElementById('p2-label').textContent = 'ARCADE MODE';
+                prepareSelectScreen();
+                showScreen('select-screen');
+                buildRoster();
                 return;
             }
             document.getElementById('p2-label').textContent = mode === 'cpu' ? 'CPU' : 'PLAYER 2';
@@ -2874,6 +3077,7 @@
             fighters.forEach(f => {
                 const div = document.createElement('div');
                 div.className = 'roster-fighter';
+                if (f.isBoss) div.classList.add('unlocked-boss');
                 div.dataset.id = f.id;
                 div.innerHTML = `
                     <img src="${f.image}" alt="${f.name}">
@@ -2894,7 +3098,9 @@
             roster.appendChild(random);
             if (lockedRoster) {
                 lockedRoster.innerHTML = '';
-                for (let i = 0; i < 5; i++) {
+                const hasBoss = fighters.find(f => f.isBoss);
+                const lockedCount = hasBoss ? 4 : 5;
+                for (let i = 0; i < lockedCount; i++) {
                     const locked = document.createElement('div');
                     locked.className = 'roster-fighter locked';
                     locked.innerHTML = `
@@ -2923,6 +3129,11 @@
             if (currentSelect === 'p1') {
                 applySelection('p1', fighter, false);
                 currentSelect = 'p2';
+
+                if (gameMode === 'arcade') {
+                    arcadeInit(fighter);
+                    return;
+                }
 
                 if (gameMode === 'cpu') {
                     // CPU selecciona aleatorio
@@ -3170,7 +3381,7 @@
                 if (!gameState.paused) {
                     update();
                     updateAnimations();
-                    if (gameMode === 'cpu') {
+                    if (gameMode === 'cpu' || gameMode === 'arcade') {
                         cpuAI();
                     }
                 }
@@ -3477,7 +3688,7 @@
                 p1El.classList.remove('blocking');
             }
 
-            if (gameMode !== 'cpu') {
+            if (gameMode !== 'cpu' && gameMode !== 'arcade') {
                 const p2Axis = (keys['ArrowRight'] ? 1 : 0) + (keys['ArrowLeft'] ? -1 : 0);
                 applyMovement('p2', p2Axis);
 
@@ -3658,6 +3869,10 @@
                 net.stateInterval = null;
             }
 
+            if (arcadeState.active) {
+                document.getElementById('fighter-p2').classList.remove('boss-fighter');
+            }
+
             let winner;
             if (gameState.p1.health > gameState.p2.health) {
                 winner = { player: 'p1', fighter: selectedP1 };
@@ -3693,6 +3908,14 @@
         function showVictory(winner) {
             showScreen('victory-screen');
             stopBattleMusic();
+
+            // Reset visibility of all button groups
+            document.getElementById('normal-victory-buttons').style.display = 'none';
+            document.getElementById('arcade-victory-buttons').style.display = 'none';
+            document.getElementById('arcade-defeat-buttons').style.display = 'none';
+            document.getElementById('arcade-complete-buttons').style.display = 'none';
+            document.getElementById('arcade-victory-info').style.display = 'none';
+
             if (gameMode === 'online') {
                 net.victoryChoice = null;
             }
@@ -3702,6 +3925,41 @@
             } else {
                 document.getElementById('winner-image').src = '';
                 document.getElementById('winner-name').textContent = 'DRAW';
+            }
+
+            if (arcadeState.active) {
+                document.getElementById('arcade-victory-info').style.display = 'block';
+                const titleEl = document.getElementById('victory-title');
+
+                if (winner.player === 'p1') {
+                    // Player won this fight
+                    arcadeState.victories.push(arcadeState.currentIndex);
+                    arcadeState.currentIndex++;
+
+                    if (arcadeState.currentIndex >= arcadeState.opponents.length) {
+                        // Arcade complete!
+                        titleEl.textContent = 'ARCADE COMPLETE!';
+                        document.getElementById('arcade-fight-count').textContent =
+                            `${arcadeState.victories.length} / ${arcadeState.opponents.length} WINS`;
+                        document.getElementById('arcade-complete-buttons').style.display = 'block';
+                        arcadeState.completed = true;
+                        unlockAlberto();
+                    } else {
+                        titleEl.textContent = 'VICTORY!';
+                        document.getElementById('arcade-fight-count').textContent =
+                            `FIGHT ${arcadeState.victories.length} / ${arcadeState.opponents.length} WON`;
+                        document.getElementById('arcade-victory-buttons').style.display = 'block';
+                    }
+                } else {
+                    // Player lost or draw
+                    titleEl.textContent = winner.player === 'draw' ? 'DRAW!' : 'DEFEAT!';
+                    document.getElementById('arcade-fight-count').textContent =
+                        `FIGHT ${arcadeState.currentIndex + 1} / ${arcadeState.opponents.length}`;
+                    document.getElementById('arcade-defeat-buttons').style.display = 'block';
+                }
+            } else {
+                document.getElementById('victory-title').textContent = 'VICTORY!';
+                document.getElementById('normal-victory-buttons').style.display = 'block';
             }
         }
 
@@ -3744,8 +4002,141 @@
             buildRoster();
         }
 
-        // CPU AI simple
+        // ============ ARCADE FUNCTIONS ============
+        function shuffleArray(arr) {
+            const a = arr.slice();
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        }
+
+        function arcadeInit(fighter) {
+            const regularFighters = fighters.filter(f => f.id !== fighter.id && !f.isBoss);
+            const shuffled = shuffleArray(regularFighters);
+            const opponents = shuffled.slice(0, 8);
+            opponents.push(ALBERTO_FIGHTER);
+
+            arcadeState = {
+                active: true,
+                playerFighter: fighter,
+                opponents: opponents,
+                currentIndex: 0,
+                victories: [],
+                difficulty: 0,
+                completed: false
+            };
+
+            selectedP1 = fighter;
+            showArcadeProgress();
+        }
+
+        function showArcadeProgress() {
+            showScreen('arcade-screen');
+            const playerImg = document.getElementById('arcade-player-img');
+            const playerName = document.getElementById('arcade-player-name');
+            const winCount = document.getElementById('arcade-win-count');
+            const ladder = document.getElementById('arcade-ladder');
+
+            playerImg.src = arcadeState.playerFighter.image;
+            playerName.textContent = `${arcadeState.playerFighter.flag} ${arcadeState.playerFighter.name}`;
+            winCount.textContent = `WINS: ${arcadeState.victories.length} / ${arcadeState.opponents.length}`;
+
+            ladder.innerHTML = '';
+            arcadeState.opponents.forEach((opp, i) => {
+                const step = document.createElement('div');
+                step.className = 'arcade-ladder-step';
+                if (opp.isBoss) step.classList.add('boss');
+
+                if (i < arcadeState.currentIndex) {
+                    step.classList.add('defeated');
+                } else if (i === arcadeState.currentIndex) {
+                    step.classList.add('current');
+                }
+
+                const isRevealed = i <= arcadeState.currentIndex;
+                const num = i + 1;
+                const name = isRevealed ? `${opp.flag} ${opp.name}` : '???';
+                let status = '';
+                if (i < arcadeState.currentIndex) status = 'WIN';
+                else if (i === arcadeState.currentIndex) status = 'NEXT';
+
+                step.innerHTML = `
+                    <span class="step-number">${num}.</span>
+                    <span class="step-name">${name}</span>
+                    <span class="step-status">${status}</span>
+                `;
+                ladder.appendChild(step);
+            });
+
+            const nextBtn = document.getElementById('arcade-next-btn');
+            if (arcadeState.completed) {
+                nextBtn.style.display = 'none';
+            } else {
+                nextBtn.style.display = '';
+            }
+        }
+
+        function arcadeNextFight() {
+            if (arcadeState.currentIndex >= arcadeState.opponents.length) return;
+
+            const opponent = arcadeState.opponents[arcadeState.currentIndex];
+            arcadeState.difficulty = arcadeState.currentIndex;
+
+            selectedP1 = arcadeState.playerFighter;
+            selectedP2 = opponent;
+            selectedStage = stages[Math.floor(Math.random() * stages.length)];
+
+            // Apply boss visual
+            if (opponent.isBoss) {
+                setTimeout(() => {
+                    document.getElementById('fighter-p2').classList.add('boss-fighter');
+                }, 100);
+            }
+
+            startBattle();
+        }
+
+        function arcadeContinue() {
+            showArcadeProgress();
+        }
+
+        function arcadeRetry() {
+            arcadeNextFight();
+        }
+
+        function arcadeQuit() {
+            arcadeState = {
+                active: false, playerFighter: null, opponents: [],
+                currentIndex: 0, victories: [], difficulty: 0, completed: false
+            };
+            stopBattleMusic();
+            backToTitle();
+        }
+
+        function unlockAlberto() {
+            localStorage.setItem(UNLOCK_KEY, '1');
+            if (!fighters.find(f => f.id === ALBERTO_FIGHTER.id)) {
+                fighters.push(ALBERTO_FIGHTER);
+            }
+        }
+
+        // CPU AI con dificultad escalable
+        function getCpuDifficulty() {
+            if (!arcadeState.active) {
+                return { attackProb: 0.03, blockProb: 0.01, evasion: false };
+            }
+            const d = arcadeState.difficulty;
+            return {
+                attackProb: 0.03 + d * 0.0075,
+                blockProb: 0.01 + d * 0.006,
+                evasion: d >= 6
+            };
+        }
+
         function cpuAI() {
+            const diff = getCpuDifficulty();
             const distance = Math.abs(gameState.p1.x - gameState.p2.x);
 
             if (distance > MOVEMENT.attackRange + 4) {
@@ -3756,15 +4147,22 @@
                 cpuInput.move = 0;
             }
 
-            if (distance <= MOVEMENT.attackRange + 2 && Math.random() < 0.03) {
+            if (distance <= MOVEMENT.attackRange + 2 && Math.random() < diff.attackProb) {
                 attack('p2', Math.random() < 0.5 ? 'punch' : 'kick');
             }
 
-            if (Math.random() < 0.01) {
+            if (Math.random() < diff.blockProb) {
                 cpuInput.block = true;
                 setTimeout(() => {
                     cpuInput.block = false;
                 }, 500);
+            }
+
+            // Evasive jumps at high difficulty
+            if (diff.evasion && distance <= MOVEMENT.attackRange + 5 && Math.random() < 0.008) {
+                if (!gameState.p2.jumping) {
+                    jump('p2');
+                }
             }
         }
 
