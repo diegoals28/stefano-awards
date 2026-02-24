@@ -1767,6 +1767,154 @@
             .controls-info { font-size: 0.45rem; }
             .online-panel { grid-template-columns: 1fr; }
         }
+
+        /* ============ ANNOUNCEMENT POPUP ============ */
+        .announce-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: announce-fade-in 0.4s ease;
+        }
+
+        @keyframes announce-fade-in {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        @keyframes announce-pop-in {
+            0% { opacity: 0; transform: scale(0.7) translateY(30px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .announce-modal {
+            background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1d 50%, #1b0a0a 100%);
+            border: 2px solid var(--neon-gold);
+            border-radius: 16px;
+            padding: 32px 36px;
+            max-width: 420px;
+            width: 90%;
+            text-align: center;
+            box-shadow:
+                0 0 40px rgba(255, 204, 0, 0.3),
+                0 0 80px rgba(255, 120, 0, 0.15),
+                inset 0 0 30px rgba(255, 204, 0, 0.05);
+            animation: announce-pop-in 0.5s ease 0.1s both;
+            position: relative;
+        }
+
+        .announce-modal::before {
+            content: "";
+            position: absolute;
+            inset: -3px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, var(--neon-gold), var(--neon-red), var(--neon-gold));
+            z-index: -1;
+            opacity: 0.5;
+            filter: blur(6px);
+        }
+
+        .announce-badge {
+            display: inline-block;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.6rem;
+            background: var(--neon-red);
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 4px;
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+            text-shadow: 0 0 8px rgba(255, 59, 47, 0.6);
+        }
+
+        .announce-portrait {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            border: 3px solid var(--neon-gold);
+            object-fit: cover;
+            margin: 12px auto;
+            display: block;
+            box-shadow: 0 0 25px rgba(255, 204, 0, 0.4);
+            animation: announce-portrait-glow 2s ease-in-out infinite;
+        }
+
+        @keyframes announce-portrait-glow {
+            0%, 100% { box-shadow: 0 0 25px rgba(255, 204, 0, 0.4); }
+            50% { box-shadow: 0 0 40px rgba(255, 204, 0, 0.7), 0 0 60px rgba(255, 120, 0, 0.3); }
+        }
+
+        .announce-title {
+            font-family: 'Bungee Shade', sans-serif;
+            font-size: 1.5rem;
+            color: var(--neon-gold);
+            text-shadow: 0 0 20px rgba(255, 204, 0, 0.6);
+            margin: 8px 0 4px;
+        }
+
+        .announce-subtitle {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.55rem;
+            color: #ccc;
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+
+        .announce-features {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .announce-feature {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 204, 0, 0.25);
+            border-radius: 8px;
+            padding: 10px 14px;
+            flex: 1;
+            max-width: 160px;
+        }
+
+        .announce-feature-label {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.45rem;
+            color: var(--neon-gold);
+            margin-bottom: 4px;
+        }
+
+        .announce-feature-desc {
+            font-size: 0.7rem;
+            color: #aaa;
+            line-height: 1.4;
+        }
+
+        .announce-btn {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.75rem;
+            background: linear-gradient(180deg, var(--neon-gold) 0%, #e6a800 100%);
+            color: #000;
+            border: none;
+            padding: 12px 36px;
+            border-radius: 8px;
+            cursor: pointer;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            box-shadow: 0 0 20px rgba(255, 204, 0, 0.4);
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+
+        .announce-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(255, 204, 0, 0.6);
+        }
+
+        .announce-btn:active {
+            transform: scale(0.97);
+        }
     </style>
 </head>
 <body>
@@ -2053,29 +2201,15 @@
             { id: 9, name: "DIEGOLARA", country: "Chile", flag: "🇨🇱", image: "personajes/diegolara.png",
               spriteBase: "sprites/diegolara", hasSprite: true, spriteOffsetX: -50,
               stats: { power: 78, speed: 82, defense: 85 },
-              story: "Táctico y resistente; espera el error y castiga sin ruido." }
+              story: "Táctico y resistente; espera el error y castiga sin ruido." },
+            { id: 10, name: "ALBERTO", country: "España", flag: "🇪🇸", image: "personajes/alberto.png",
+              spriteBase: "sprites/alberto", hasSprite: true, spriteOffsetX: 0, isBoss: true,
+              stats: { power: 95, speed: 88, defense: 95 },
+              story: "El jefe final. Filosofo, maestro y estratega. Su calma esconde un poder devastador." }
         ];
 
-        // Alberto - Boss del modo Arcade
-        const ALBERTO_FIGHTER = {
-            id: 10, name: "ALBERTO", country: "Italia", flag: "🇮🇹",
-            image: "personajes/alberto.png",
-            spriteBase: "sprites/alberto",
-            hasSprite: true, spriteOffsetX: 0, spriteScale: 0.85, isBoss: true,
-            stats: { power: 95, speed: 88, defense: 95 },
-            story: "El jefe final. Filosofo, maestro y estratega. Su calma esconde un poder devastador."
-        };
-        const UNLOCK_KEY = 'enroma_unlocked_alberto';
-
-        function loadUnlocks() {
-            const params = new URLSearchParams(window.location.search);
-            if (localStorage.getItem(UNLOCK_KEY) === '1' || params.get('test') === 'alberto') {
-                if (!fighters.find(f => f.id === ALBERTO_FIGHTER.id)) {
-                    fighters.push(ALBERTO_FIGHTER);
-                }
-            }
-        }
-        loadUnlocks();
+        // Reference for Arcade mode boss
+        const ALBERTO_FIGHTER = fighters.find(f => f.id === 10);
 
         function buildCarousel() {
             const track = document.getElementById('carousel-track');
@@ -2151,6 +2285,11 @@
                 id: 'departamento-operativo',
                 name: 'Departamento Operativo',
                 image: 'assets/backgrounds/departamento-operativo.png'
+            },
+            {
+                id: 'largo-corrado-ricci',
+                name: 'Largo Corrado Ricci',
+                image: 'assets/backgrounds/largocorradoricci.png'
             }
         ];
 
@@ -3075,10 +3214,9 @@
             const roster = document.getElementById('roster');
             const lockedRoster = document.getElementById('locked-roster');
             roster.innerHTML = '';
-            fighters.forEach(f => {
+            fighters.filter(f => !f.isBoss).forEach(f => {
                 const div = document.createElement('div');
                 div.className = 'roster-fighter';
-                if (f.isBoss) div.classList.add('unlocked-boss');
                 div.dataset.id = f.id;
                 div.innerHTML = `
                     <img src="${f.image}" alt="${f.name}">
@@ -3099,8 +3237,20 @@
             roster.appendChild(random);
             if (lockedRoster) {
                 lockedRoster.innerHTML = '';
-                const hasBoss = fighters.find(f => f.isBoss);
-                const lockedCount = hasBoss ? 4 : 5;
+                // Alberto goes in the locked section as a selectable boss
+                const boss = fighters.find(f => f.isBoss);
+                if (boss) {
+                    const div = document.createElement('div');
+                    div.className = 'roster-fighter unlocked-boss';
+                    div.dataset.id = boss.id;
+                    div.innerHTML = `
+                        <img src="${boss.image}" alt="${boss.name}">
+                        <div class="fighter-name">${boss.flag} ${boss.name}</div>
+                    `;
+                    div.onclick = () => selectFighter(boss);
+                    lockedRoster.appendChild(div);
+                }
+                const lockedCount = boss ? 4 : 5;
                 for (let i = 0; i < lockedCount; i++) {
                     const locked = document.createElement('div');
                     locked.className = 'roster-fighter locked';
@@ -3945,7 +4095,6 @@
                             `${arcadeState.victories.length} / ${arcadeState.opponents.length} WINS`;
                         document.getElementById('arcade-complete-buttons').style.display = 'block';
                         arcadeState.completed = true;
-                        unlockAlberto();
                     } else {
                         titleEl.textContent = 'VICTORY!';
                         document.getElementById('arcade-fight-count').textContent =
@@ -4117,12 +4266,6 @@
             backToTitle();
         }
 
-        function unlockAlberto() {
-            localStorage.setItem(UNLOCK_KEY, '1');
-            if (!fighters.find(f => f.id === ALBERTO_FIGHTER.id)) {
-                fighters.push(ALBERTO_FIGHTER);
-            }
-        }
 
         // CPU AI con dificultad escalable
         function getCpuDifficulty() {
@@ -4209,8 +4352,39 @@
         });
 
         window.addEventListener('load', () => {
-            // Voting screen initializes on demand.
+            // Show announcement popup once per session
+            if (!sessionStorage.getItem('enroma_announce_seen')) {
+                const overlay = document.getElementById('announce-overlay');
+                if (overlay) overlay.style.display = 'flex';
+            }
         });
+
+        function dismissAnnounce() {
+            sessionStorage.setItem('enroma_announce_seen', '1');
+            const overlay = document.getElementById('announce-overlay');
+            if (overlay) overlay.remove();
+        }
     </script>
+
+    <!-- Announcement Popup -->
+    <div class="announce-overlay" id="announce-overlay" style="display:none;">
+        <div class="announce-modal">
+            <div class="announce-badge">NUEVO</div>
+            <img src="personajes/alberto.png" alt="Alberto" class="announce-portrait">
+            <div class="announce-title">ALBERTO</div>
+            <div class="announce-subtitle">EL JEFE FINAL HA LLEGADO</div>
+            <div class="announce-features">
+                <div class="announce-feature">
+                    <div class="announce-feature-label">FIGHTER</div>
+                    <div class="announce-feature-desc">Nuevo luchador disponible en todos los modos</div>
+                </div>
+                <div class="announce-feature">
+                    <div class="announce-feature-label">ARCADE</div>
+                    <div class="announce-feature-desc">Nuevo modo: lucha contra todos y vence al jefe</div>
+                </div>
+            </div>
+            <button class="announce-btn" onclick="dismissAnnounce()">VAMOS!</button>
+        </div>
+    </div>
 </body>
 </html>
