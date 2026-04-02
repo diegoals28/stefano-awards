@@ -431,6 +431,254 @@
             gap: 30px;
         }
 
+        .vote-panel {
+            margin-top: 20px;
+            width: min(1000px, 95vw);
+            background: var(--panel);
+            border: 2px solid var(--panel-border);
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: 0 0 26px rgba(0, 0, 0, 0.6), 0 0 18px var(--panel-glow) inset;
+        }
+
+        .vote-header {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.8rem;
+            color: var(--neon-gold);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .vote-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .vote-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .vote-control {
+            background: rgba(10, 10, 20, 0.7);
+            border: 2px solid #2f2f3f;
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.7);
+        }
+
+        .vote-label {
+            font-size: 0.7rem;
+            color: #b9b1a2;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .vote-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(90px, 1fr));
+            gap: 8px;
+        }
+
+        .vote-option {
+            background: linear-gradient(180deg, #1f1f2e 0%, #12121a 100%);
+            border: 2px solid #2f2f3f;
+            color: #f7f2e8;
+            font-family: 'Oxanium', sans-serif;
+            font-size: 0.7rem;
+            padding: 8px 6px;
+            text-transform: uppercase;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #0a0a0f;
+            transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+        }
+
+        .vote-option:hover {
+            border-color: var(--neon-gold);
+            transform: translateY(-1px);
+        }
+
+        .vote-option.selected {
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 16px rgba(27, 213, 255, 0.5), 0 6px 0 #0a0a0f;
+        }
+
+        .vote-option.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .vote-actions {
+            grid-column: span 2;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .vote-btn {
+            padding: 10px 16px;
+            background: linear-gradient(180deg, #ff9a1a 0%, #d12900 100%);
+            border: 2px solid var(--neon-gold);
+            color: #1a0a0a;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.7rem;
+            cursor: pointer;
+        }
+
+        .vote-status {
+            font-size: 0.7rem;
+            color: #c7c1b3;
+        }
+
+        .vote-wheel {
+            display: grid;
+            justify-items: center;
+            gap: 10px;
+        }
+
+        .vote-wheel.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.98);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .vote-wheel.show {
+            opacity: 1;
+            pointer-events: auto;
+            transform: scale(1);
+        }
+
+        .wheel-container {
+            position: relative;
+            width: 180px;
+            height: 180px;
+        }
+
+        .wheel-container.reveal {
+            animation: wheel-reveal 0.6s ease;
+        }
+
+        .wheel-container.spin-pop {
+            animation: wheel-pop 0.4s ease;
+        }
+
+        .wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 6px solid #1b1b28;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.7), inset 0 0 18px rgba(255, 255, 255, 0.1);
+            background: conic-gradient(from -90deg,
+                #ff7a00 0deg 169.2deg,
+                #ff3030 169.2deg 338.4deg,
+                #ffd45a 338.4deg 360deg);
+            transition: transform 2.2s cubic-bezier(0.2, 0.9, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .wheel-pointer {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            width: 0;
+            height: 0;
+            transform: translateX(-50%);
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 18px solid #f7f2e8;
+            filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.7));
+        }
+
+        .wheel-result {
+            font-size: 0.7rem;
+            color: var(--neon-gold);
+            text-align: center;
+            min-height: 32px;
+        }
+
+        .wheel-hint {
+            font-size: 0.6rem;
+            color: #b9b1a2;
+            text-align: center;
+        }
+
+        .wheel-banner {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.55rem;
+            color: #1bd5ff;
+            text-shadow: 0 0 8px rgba(27, 213, 255, 0.8);
+            letter-spacing: 2px;
+            opacity: 0.9;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 6px;
+            height: 10px;
+            background: #ffd45a;
+            top: 50%;
+            left: 50%;
+            opacity: 0;
+            animation: confetti-fall 1.4s ease forwards;
+        }
+
+        .confetti.c1 { background: #ff7a00; }
+        .confetti.c2 { background: #ff3030; }
+        .confetti.c3 { background: #1bd5ff; }
+        .confetti.c4 { background: #ffd45a; }
+
+        @keyframes wheel-reveal {
+            0% { transform: scale(0.6) rotate(-10deg); opacity: 0; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        @keyframes wheel-pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes confetti-fall {
+            0% { transform: translate(-50%, -50%) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(220deg); opacity: 0; }
+        }
+
+        .vote-results {
+            margin-top: 14px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .result-block {
+            background: rgba(10, 10, 20, 0.6);
+            border: 2px solid #2f2f3f;
+            border-radius: 10px;
+            padding: 10px;
+        }
+
+        .result-title {
+            font-size: 0.7rem;
+            color: #b9b1a2;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .result-list {
+            display: grid;
+            gap: 6px;
+            font-size: 0.75rem;
+        }
+
         .mode-btn {
             font-family: 'Oxanium', sans-serif;
             font-size: 1rem;
@@ -1507,7 +1755,12 @@
             .mode-buttons { flex-direction: column; gap: 15px; }
             .title-grid { grid-template-columns: 1fr; }
             .carousel-card { width: 70px; height: 90px; }
-.select-container { flex-direction: column; align-items: center; }
+            .vote-panel { padding: 14px; }
+            .vote-grid { grid-template-columns: 1fr; }
+            .vote-controls { grid-template-columns: 1fr; }
+            .vote-actions { flex-direction: column; align-items: flex-start; }
+            .vote-results { grid-template-columns: 1fr; }
+            .select-container { flex-direction: column; align-items: center; }
             .roster { grid-template-columns: repeat(3, 1fr); }
             .battle-hud { padding: 15px 10px; }
             .timer { font-size: 1.6rem; }
@@ -1688,6 +1941,7 @@
             <div class="title-strip">
                 <div class="title-chip">SNES STYLE</div>
                 <div class="title-chip">PIXEL CLEAN</div>
+                <div class="title-chip">WEEKLY VOTE</div>
                 <div class="title-chip">ONLINE READY</div>
             </div>
         </div>
@@ -1700,8 +1954,59 @@
             <button class="mode-btn" onclick="startGame('cpu')">VS CPU</button>
             <button class="mode-btn" onclick="startGame('arcade')">ARCADE</button>
             <button class="mode-btn" onclick="startGame('online')">ONLINE</button>
+            <button class="mode-btn" onclick="showVoteScreen()">VOTE</button>
         </div>
         <p class="press-start">SELECT GAME MODE</p>
+    </div>
+
+    <!-- PANTALLA VOTACION -->
+    <div id="vote-screen" class="screen">
+        <h2 class="select-title">VOTACION SEMANAL</h2>
+        <div class="vote-panel">
+            <div class="vote-grid">
+                <div class="vote-controls">
+                    <div class="vote-control">
+                        <div class="vote-label">Tu personaje</div>
+                        <div class="vote-buttons" id="voter-select"></div>
+                        <input type="hidden" id="voter-value">
+                    </div>
+                    <div class="vote-control">
+                        <div class="vote-label">Mejor trabajador</div>
+                        <div class="vote-buttons" id="best-select"></div>
+                        <input type="hidden" id="best-value">
+                    </div>
+                    <div class="vote-control">
+                        <div class="vote-label">Peor trabajador</div>
+                        <div class="vote-buttons" id="worst-select"></div>
+                        <input type="hidden" id="worst-value">
+                    </div>
+                    <div class="vote-actions">
+                        <button class="vote-btn" id="vote-submit">VOTAR</button>
+                        <div class="vote-status" id="vote-status">Selecciona tu personaje para votar.</div>
+                    </div>
+                </div>
+                <div class="vote-wheel" id="vote-wheel-wrap">
+                    <div class="wheel-container">
+                        <div class="wheel" id="fortune-wheel"></div>
+                        <div class="wheel-pointer"></div>
+                    </div>
+                    <div class="wheel-banner" id="wheel-banner">RESULTADOS LISTOS</div>
+                    <div class="wheel-result" id="wheel-result"></div>
+                    <div class="wheel-hint" id="vote-deadline"></div>
+                </div>
+            </div>
+            <div class="vote-results">
+                <div class="result-block">
+                    <div class="result-title">Mejor trabajador (votos)</div>
+                    <div class="result-list" id="best-results"></div>
+                </div>
+                <div class="result-block">
+                    <div class="result-title">Peor trabajador (votos)</div>
+                    <div class="result-list" id="worst-results"></div>
+                </div>
+            </div>
+        </div>
+        <button class="rematch-btn" onclick="backToTitle()">BACK</button>
     </div>
 
     <!-- PANTALLA ONLINE -->
@@ -1857,6 +2162,7 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
     <script>
         // Datos de personajes
         const fighters = [
@@ -2011,6 +2317,10 @@
         const SPRITE_VERSION = 'v10';
         const MAX_HEALTH = 150;
 
+        // Supabase (votacion)
+        const SUPABASE_URL = 'https://xrlkvrmtcitikvzgghlw.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhybGt2cm10Y2l0aWt2emdnaGx3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg5Njc4OTEsImV4cCI6MjA4NDU0Mzg5MX0.T2yTa5qNE2G9eIutW2EjZeBwzDjmiOz2W--G5u6sV-o';
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // Networking (WebRTC + signaling)
         const SIGNALING_URL = 'wss://stefano-awards-production.up.railway.app';
@@ -2034,6 +2344,12 @@
             victoryChoice: null,
             matchId: 0
         };
+
+        const VOTE_OUTCOMES = [
+            { id: 'best_to_worst', label: 'El mejor trabajador le ofrece el desayuno al peor', weight: 0.47 },
+            { id: 'worst_to_best', label: 'El peor trabajador ofrece el desayuno al mejor', weight: 0.47 },
+            { id: 'both_offer', label: 'Ambos se ofrecen el desayuno el uno al otro', weight: 0.06 }
+        ];
 
         let audioCtx = null;
         const battleBgm = { interval: null, step: 0 };
@@ -2121,6 +2437,12 @@
             prepareSelectScreen();
             showScreen('select-screen');
             buildRoster();
+        }
+
+        function showVoteScreen() {
+            showScreen('vote-screen');
+            ensureAudio();
+            initVoting();
         }
 
         function backToTitle() {
@@ -2520,6 +2842,193 @@
             return LOCAL_KEYS[role].includes(key);
         }
 
+        function initVoting() {
+            populateVoteOptions();
+            const { electionKey, deadlineRome } = getElectionWindow();
+            updateVoteDeadline(deadlineRome);
+            updateWheelVisibility();
+            refreshVoteResults();
+            updateVoteStatus();
+
+            document.getElementById('vote-submit').addEventListener('click', submitVote);
+
+            setInterval(() => {
+                updateVoteStatus();
+                refreshVoteResults();
+                updateWheelVisibility();
+            }, 30000);
+        }
+
+        function populateVoteOptions() {
+            const voterSelect = document.getElementById('voter-select');
+            const bestSelect = document.getElementById('best-select');
+            const worstSelect = document.getElementById('worst-select');
+            const options = fighters.map(f => f.name);
+
+            voterSelect.innerHTML = '';
+            bestSelect.innerHTML = '';
+            worstSelect.innerHTML = '';
+
+            options.forEach(name => {
+                voterSelect.appendChild(buildVoteButton('voter', name));
+                bestSelect.appendChild(buildVoteButton('best', name));
+                worstSelect.appendChild(buildVoteButton('worst', name));
+            });
+
+            const saved = localStorage.getItem('stefano_voter');
+            if (saved) setVoteSelection('voter', saved, true);
+        }
+
+        function buildVoteButton(type, name) {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'vote-option';
+            btn.textContent = name;
+            btn.dataset.value = name;
+            btn.addEventListener('click', () => {
+                if (btn.classList.contains('disabled')) return;
+                setVoteSelection(type, name, false);
+            });
+            return btn;
+        }
+
+        function setVoteSelection(type, value, silent) {
+            const wrapId = `${type}-select`;
+            const wrap = document.getElementById(wrapId);
+            const hidden = document.getElementById(`${type}-value`);
+            Array.from(wrap.querySelectorAll('.vote-option')).forEach(btn => {
+                btn.classList.toggle('selected', btn.dataset.value === value);
+            });
+            hidden.value = value;
+            if (type === 'voter') {
+                localStorage.setItem('stefano_voter', value);
+            }
+            if (!silent) updateVoteStatus();
+        }
+
+        function getVoteSelection(type) {
+            return document.getElementById(`${type}-value`).value || '';
+        }
+
+        function getRomeNow() {
+            return new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Rome' }));
+        }
+
+        function getElectionWindow() {
+            const nowRome = getRomeNow();
+            const deadlineRome = new Date(nowRome);
+            deadlineRome.setHours(11, 30, 0, 0);
+
+            const day = nowRome.getDay(); // 0 Sunday - 6 Saturday
+            const daysToThursday = (4 - day + 7) % 7;
+            if (daysToThursday === 0 && nowRome > deadlineRome) {
+                deadlineRome.setDate(deadlineRome.getDate() + 7);
+            } else {
+                deadlineRome.setDate(deadlineRome.getDate() + daysToThursday);
+            }
+
+            const electionKey = `${deadlineRome.getFullYear()}-${String(deadlineRome.getMonth() + 1).padStart(2, '0')}-${String(deadlineRome.getDate()).padStart(2, '0')}-1130`;
+            return { electionKey, deadlineRome };
+        }
+
+        function updateVoteDeadline(deadlineRome) {
+            const deadlineText = deadlineRome.toLocaleString('es-ES', {
+                timeZone: 'Europe/Rome',
+                weekday: 'short',
+                day: '2-digit',
+                month: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            document.getElementById('vote-deadline').textContent = `Cierra: ${deadlineText} (Italia)`;
+        }
+
+        function isVotingOpen() {
+            const { deadlineRome } = getElectionWindow();
+            return getRomeNow() < deadlineRome;
+        }
+
+        function updateVoteStatus() {
+            const status = document.getElementById('vote-status');
+            const { electionKey } = getElectionWindow();
+            const hasVoted = localStorage.getItem(`stefano_voted_${electionKey}`) === '1';
+            if (!isVotingOpen()) {
+                status.textContent = 'Votacion cerrada. Vuelve el jueves.';
+                document.getElementById('vote-submit').disabled = true;
+                setVoteButtonsDisabled(true);
+                return;
+            }
+            if (hasVoted) {
+                status.textContent = 'Voto registrado para esta semana.';
+                document.getElementById('vote-submit').disabled = true;
+                setVoteButtonsDisabled(true);
+                return;
+            }
+            const voter = getVoteSelection('voter');
+            status.textContent = voter ? 'Listo para votar.' : 'Selecciona tu personaje para votar.';
+            document.getElementById('vote-submit').disabled = !voter;
+            setVoteButtonsDisabled(false);
+        }
+
+        function seededRandom(seed) {
+            let hash = 0;
+            for (let i = 0; i < seed.length; i++) {
+                hash = (hash * 31 + seed.charCodeAt(i)) % 1000000007;
+            }
+            return (hash % 10000) / 10000;
+        }
+
+        function pickWeeklyOutcome(electionKey) {
+            const r = seededRandom(electionKey);
+            let acc = 0;
+            for (const outcome of VOTE_OUTCOMES) {
+                acc += outcome.weight;
+                if (r <= acc) return outcome;
+            }
+            return VOTE_OUTCOMES[VOTE_OUTCOMES.length - 1];
+        }
+
+        function animateWheel(electionKey) {
+            const wheel = document.getElementById('fortune-wheel');
+            const outcome = pickWeeklyOutcome(electionKey);
+            const outcomeIndex = VOTE_OUTCOMES.findIndex(o => o.id === outcome.id);
+            const segmentAngles = [0.47 * 360, 0.47 * 360, 0.06 * 360];
+            const startAngles = [0, segmentAngles[0], segmentAngles[0] + segmentAngles[1]];
+            const centerAngle = startAngles[outcomeIndex] + segmentAngles[outcomeIndex] / 2;
+
+            const spins = 5;
+            const jitter = Math.floor(seededRandom(electionKey + '_j') * 30) - 15;
+            const targetRotation = spins * 360 - centerAngle + jitter;
+            wheel.style.transform = `rotate(${targetRotation}deg)`;
+
+            document.getElementById('wheel-result').textContent = outcome.label;
+        }
+
+        function updateWheelVisibility() {
+            const wheelWrap = document.getElementById('vote-wheel-wrap');
+            const { electionKey } = getElectionWindow();
+            wheelWrap.classList.remove('hidden');
+            wheelWrap.classList.add('show');
+            playWheelReveal(electionKey);
+        }
+
+        function playWheelReveal(electionKey) {
+            const wheelWrap = document.getElementById('vote-wheel-wrap');
+            const wheelContainer = wheelWrap.querySelector('.wheel-container');
+            wheelContainer.classList.remove('reveal');
+            wheelContainer.classList.remove('spin-pop');
+            void wheelContainer.offsetWidth;
+            wheelContainer.classList.add('reveal');
+            ensureAudio();
+            animateWheel(electionKey);
+            playWheelSpin();
+            setTimeout(() => {
+                wheelContainer.classList.add('spin-pop');
+                spawnConfetti(wheelContainer);
+                playWheelWin();
+            }, 1200);
+        }
+
         function ensureAudio() {
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -2567,6 +3076,141 @@
                 clearInterval(battleBgm.interval);
                 battleBgm.interval = null;
             }
+        }
+
+        function playWheelSpin() {
+            if (!audioCtx) return;
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(180, now);
+            osc.frequency.exponentialRampToValueAtTime(620, now + 1.1);
+            gain.gain.setValueAtTime(0.0001, now);
+            gain.gain.exponentialRampToValueAtTime(0.12, now + 0.1);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.2);
+            osc.connect(gain).connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + 1.25);
+        }
+
+        function playWheelWin() {
+            if (!audioCtx) return;
+            const now = audioCtx.currentTime;
+            const freqs = [523.25, 659.25, 783.99];
+            freqs.forEach((freq, i) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = i === 1 ? 'triangle' : 'sine';
+                osc.frequency.setValueAtTime(freq, now);
+                gain.gain.setValueAtTime(0.0001, now);
+                gain.gain.exponentialRampToValueAtTime(0.18, now + 0.05);
+                gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
+                osc.connect(gain).connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + 0.65);
+            });
+        }
+
+        function spawnConfetti(container) {
+            const colors = ['c1', 'c2', 'c3', 'c4'];
+            for (let i = 0; i < 28; i++) {
+                const piece = document.createElement('div');
+                piece.className = `confetti ${colors[i % colors.length]}`;
+                const dx = (Math.random() * 240 - 120).toFixed(0) + 'px';
+                const dy = (Math.random() * 220 + 80).toFixed(0) + 'px';
+                piece.style.setProperty('--dx', dx);
+                piece.style.setProperty('--dy', dy);
+                piece.style.transform = `translate(-50%, -50%) rotate(${Math.random() * 180}deg)`;
+                piece.style.left = '50%';
+                piece.style.top = '50%';
+                piece.style.animationDelay = (Math.random() * 0.25).toFixed(2) + 's';
+                container.appendChild(piece);
+                setTimeout(() => piece.remove(), 1600);
+            }
+        }
+
+        async function submitVote() {
+            if (!isVotingOpen()) {
+                document.getElementById('vote-status').textContent = 'Votacion cerrada.';
+                return;
+            }
+
+            const voter = getVoteSelection('voter');
+            const best = getVoteSelection('best');
+            const worst = getVoteSelection('worst');
+
+            if (!voter || !best || !worst) {
+                document.getElementById('vote-status').textContent = 'Completa todos los campos.';
+                return;
+            }
+            if (best === worst) {
+                document.getElementById('vote-status').textContent = 'Mejor y peor deben ser distintos.';
+                return;
+            }
+
+            const { electionKey } = getElectionWindow();
+            const { error } = await supabaseClient
+                .from('votes')
+                .insert({
+                    election_key: electionKey,
+                    voter,
+                    best,
+                    worst
+                });
+
+            if (error) {
+                document.getElementById('vote-status').textContent = 'No se pudo votar. Puede que ya hayas votado.';
+                return;
+            }
+
+            localStorage.setItem(`stefano_voted_${electionKey}`, '1');
+            document.getElementById('vote-status').textContent = 'Voto registrado.';
+            document.getElementById('vote-submit').disabled = true;
+            setVoteButtonsDisabled(true);
+            refreshVoteResults();
+        }
+
+        function setVoteButtonsDisabled(disabled) {
+            ['voter-select', 'best-select', 'worst-select'].forEach(id => {
+                const wrap = document.getElementById(id);
+                if (!wrap) return;
+                wrap.querySelectorAll('.vote-option').forEach(btn => {
+                    btn.classList.toggle('disabled', disabled);
+                });
+            });
+        }
+
+        async function refreshVoteResults() {
+            const { electionKey } = getElectionWindow();
+            const { data, error } = await supabaseClient
+                .from('votes')
+                .select('best,worst')
+                .eq('election_key', electionKey);
+
+            if (error || !data) {
+                return;
+            }
+
+            const bestCounts = {};
+            const worstCounts = {};
+            data.forEach(row => {
+                bestCounts[row.best] = (bestCounts[row.best] || 0) + 1;
+                worstCounts[row.worst] = (worstCounts[row.worst] || 0) + 1;
+            });
+
+            renderResultList('best-results', bestCounts);
+            renderResultList('worst-results', worstCounts);
+        }
+
+        function renderResultList(targetId, counts) {
+            const target = document.getElementById(targetId);
+            const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+            if (!entries.length) {
+                target.textContent = 'Sin votos aun.';
+                return;
+            }
+            target.innerHTML = entries.map(([name, count]) => `<div>${name}: ${count}</div>`).join('');
         }
 
         // Construir roster
