@@ -2038,7 +2038,11 @@
             { id: 11, name: "DAVIDE", country: "Italia", flag: "🇮🇹", image: "personajes/davide.png",
               spriteBase: "sprites/davide", hasSprite: true, spriteOffsetX: 0,
               stats: { power: 80, speed: 85, defense: 82 },
-              story: "Elegancia y precisión en cada movimiento; combate como si bailara." }
+              story: "Elegancia y precisión en cada movimiento; combate como si bailara." },
+            { id: 12, name: "VANESSA", country: "Chile", flag: "🇨🇱", image: "personajes/vanessa.svg",
+              spriteBase: "sprites/vanessa", hasSprite: true, spriteOffsetX: 0,
+              stats: { power: 78, speed: 90, defense: 76 },
+              story: "Espíritu libre y golpes certeros; llega desde el sur con fuego en las manos." }
         ];
 
         // Reference for Arcade mode boss
@@ -3997,14 +4001,14 @@
 
         window.addEventListener('load', () => {
             // Show announcement popup once per session
-            if (!sessionStorage.getItem('enroma_announce_davide')) {
+            if (!sessionStorage.getItem('enroma_announce_vanessa')) {
                 const overlay = document.getElementById('announce-overlay');
                 if (overlay) overlay.style.display = 'flex';
             }
         });
 
         function dismissAnnounce() {
-            sessionStorage.setItem('enroma_announce_davide', '1');
+            sessionStorage.setItem('enroma_announce_vanessa', '1');
             const overlay = document.getElementById('announce-overlay');
             if (overlay) overlay.remove();
         }
@@ -4014,13 +4018,13 @@
     <div class="announce-overlay" id="announce-overlay" style="display:none;">
         <div class="announce-modal">
             <div class="announce-badge">NUEVO</div>
-            <img src="personajes/davide.png" alt="Davide" class="announce-portrait">
-            <div class="announce-title">DAVIDE</div>
-            <div class="announce-subtitle">UN NUEVO LUCHADOR SE UNE AL COMBATE</div>
+            <img src="personajes/vanessa.svg" alt="Vanessa" class="announce-portrait">
+            <div class="announce-title">VANESSA</div>
+            <div class="announce-subtitle">UNA NUEVA LUCHADORA SE UNE AL COMBATE</div>
             <div class="announce-features">
                 <div class="announce-feature">
                     <div class="announce-feature-label">FIGHTER</div>
-                    <div class="announce-feature-desc">Nuevo luchador italiano disponible en todos los modos</div>
+                    <div class="announce-feature-desc">Nueva luchadora chilena disponible en todos los modos</div>
                 </div>
             </div>
             <button class="announce-btn" onclick="dismissAnnounce()">VAMOS!</button>
