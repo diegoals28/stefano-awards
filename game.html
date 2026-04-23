@@ -1959,7 +1959,7 @@
 
         <div class="controls-info">
             P1: A/D Move | W Jump | S Crouch | F Punch | G Kick | H Block &nbsp;&nbsp;|&nbsp;&nbsp;
-            P2: Arrows Move | U Punch | I Kick | O Block
+            P2: Arrows Move | Num1 Punch | Num2 Kick | Num3 Block
         </div>
     </div>
 
@@ -2148,7 +2148,7 @@
         };
 
         const SPRITE_VERSION = 'v10';
-        const MAX_HEALTH = 150;
+        const MAX_HEALTH = 195;
 
         // (Supabase removed – voting system eliminated)
 
@@ -2156,7 +2156,7 @@
         const SIGNALING_URL = 'wss://stefano-awards-production.up.railway.app';
         const LOCAL_KEYS = {
             p1: ['a','A','d','D','w','W','s','S','f','F','g','G','h','H'],
-            p2: ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','u','U','i','I','o','O']
+            p2: ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Numpad1','Numpad2','Numpad3']
         };
         let net = {
             enabled: false,
@@ -2583,10 +2583,10 @@
                     if (msg.key === 'g' || msg.key === 'G') {
                         attack('p1', 'kick');
                     }
-                    if (msg.key === 'u' || msg.key === 'U') {
+                    if (msg.key === 'Numpad1') {
                         attack('p2', 'punch');
                     }
-                    if (msg.key === 'i' || msg.key === 'I') {
+                    if (msg.key === 'Numpad2') {
                         attack('p2', 'kick');
                     }
                 }
@@ -3500,7 +3500,7 @@
                 if (keys['ArrowUp'] && !gameState.p2.jumping) {
                     jump('p2');
                 }
-                if (keys['o'] || keys['O']) {
+                if (keys['Numpad3']) {
                     gameState.p2.blocking = true;
                     p2El.classList.add('blocking');
                 } else {
@@ -3965,11 +3965,19 @@
         }
 
         // Controles
-        document.addEventListener('keydown', (e) => {
-            keys[e.key] = true;
+        const isNumpadCode = (code) => typeof code === 'string' && code.startsWith('Numpad');
+        const netKey = (e) => isNumpadCode(e.code) ? e.code : e.key;
 
-            if (gameMode === 'online' && net.connected && isLocalOnlineKey(e.key)) {
-                sendDataMessage({ type: 'key', key: e.key, down: true });
+        document.addEventListener('keydown', (e) => {
+            if (isNumpadCode(e.code)) {
+                keys[e.code] = true;
+            } else {
+                keys[e.key] = true;
+            }
+
+            const k = netKey(e);
+            if (gameMode === 'online' && net.connected && isLocalOnlineKey(k)) {
+                sendDataMessage({ type: 'key', key: k, down: true });
             }
 
             // Ataques P1
@@ -3982,20 +3990,25 @@
 
             // Ataques P2
             if ((gameMode === 'pvp' || gameMode === 'online') && !gameState.paused) {
-                if (e.key === 'u' || e.key === 'U') {
+                if (e.code === 'Numpad1') {
                     attack('p2', 'punch');
                 }
-                if (e.key === 'i' || e.key === 'I') {
+                if (e.code === 'Numpad2') {
                     attack('p2', 'kick');
                 }
             }
         });
 
         document.addEventListener('keyup', (e) => {
-            keys[e.key] = false;
+            if (isNumpadCode(e.code)) {
+                keys[e.code] = false;
+            } else {
+                keys[e.key] = false;
+            }
 
-            if (gameMode === 'online' && net.connected && isLocalOnlineKey(e.key)) {
-                sendDataMessage({ type: 'key', key: e.key, down: false });
+            const k = netKey(e);
+            if (gameMode === 'online' && net.connected && isLocalOnlineKey(k)) {
+                sendDataMessage({ type: 'key', key: k, down: false });
             }
         });
 
