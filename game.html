@@ -1816,7 +1816,7 @@
             <button class="mode-btn" onclick="startGame('cpu')">VS CPU</button>
             <button class="mode-btn" onclick="startGame('arcade')">ARCADE</button>
             <button class="mode-btn" onclick="startGame('online')">ONLINE</button>
-            <button class="mode-btn" onclick="showWheelScreen()">DESAYUNO</button>
+            <button class="mode-btn" onclick="showWheelScreen()" style="display:none;">DESAYUNO</button>
         </div>
         <p class="press-start">SELECT GAME MODE</p>
     </div>
@@ -4012,36 +4012,6 @@
             }
         });
 
-        window.addEventListener('load', () => {
-            // Show announcement popup once per session
-            if (!sessionStorage.getItem('enroma_announce_vanessa')) {
-                const overlay = document.getElementById('announce-overlay');
-                if (overlay) overlay.style.display = 'flex';
-            }
-        });
-
-        function dismissAnnounce() {
-            sessionStorage.setItem('enroma_announce_vanessa', '1');
-            const overlay = document.getElementById('announce-overlay');
-            if (overlay) overlay.remove();
-        }
     </script>
-
-    <!-- Announcement Popup -->
-    <div class="announce-overlay" id="announce-overlay" style="display:none;">
-        <div class="announce-modal">
-            <div class="announce-badge">NUEVO</div>
-            <img src="personajes/vanessa.png" alt="Vanessa" class="announce-portrait">
-            <div class="announce-title">VANESSA</div>
-            <div class="announce-subtitle">UNA NUEVA LUCHADORA SE UNE AL COMBATE</div>
-            <div class="announce-features">
-                <div class="announce-feature">
-                    <div class="announce-feature-label">FIGHTER</div>
-                    <div class="announce-feature-desc">Nueva luchadora chilena disponible en todos los modos</div>
-                </div>
-            </div>
-            <button class="announce-btn" onclick="dismissAnnounce()">VAMOS!</button>
-        </div>
-    </div>
 </body>
 </html>
