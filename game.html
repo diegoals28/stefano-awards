@@ -1536,6 +1536,45 @@
             border-radius: 3px;
         }
 
+        .roster-fighter.unavailable {
+            cursor: not-allowed;
+            border-color: #3a3a4b;
+            position: relative;
+        }
+
+        .roster-fighter.unavailable img {
+            filter: grayscale(1) brightness(0.55);
+        }
+
+        .roster-fighter.unavailable .fighter-name {
+            color: #9b94a6;
+        }
+
+        .roster-fighter.unavailable::before {
+            content: "PRÓXIMAMENTE";
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%) rotate(-12deg);
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.5rem;
+            letter-spacing: 1px;
+            padding: 6px 8px;
+            color: #ffd86a;
+            background: linear-gradient(180deg, #3b1a00 0%, #1f0a00 100%);
+            border: 2px solid #ff8c2f;
+            text-shadow: 2px 2px 0 #000;
+            box-shadow: 0 0 12px rgba(255, 140, 47, 0.55);
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .roster-fighter.unavailable:hover {
+            border-color: #3a3a4b;
+            transform: none;
+        }
+
         @keyframes arcade-glow {
             0%, 100% { box-shadow: 0 0 15px rgba(255, 204, 0, 0.4); }
             50% { box-shadow: 0 0 35px rgba(255, 204, 0, 0.8), 0 0 60px rgba(255, 120, 0, 0.4); }
@@ -2004,7 +2043,7 @@
               stats: { power: 80, speed: 70, defense: 85 },
               story: "Defiende el territorio con calma y rompe ritmos con precisión." },
             { id: 3, name: "MORANSITO", country: "El Salvador", flag: "🇸🇻", image: "personajes/moransito.png",
-              spriteBase: "sprites/moransito", hasSprite: true, spriteOffsetX: 0,
+              spriteBase: "sprites/moransito", hasSprite: true, spriteOffsetX: 0, unavailable: true,
               stats: { power: 75, speed: 90, defense: 70 },
               story: "Velocidad pura y reflejos de barrio; golpea, desaparece y vuelve." },
             { id: 4, name: "KAS", country: "España", flag: "🇪🇸", image: "personajes/kas.png",
@@ -2042,7 +2081,11 @@
             { id: 12, name: "VANESSA", country: "Chile", flag: "🇨🇱", image: "personajes/vanessa.png",
               spriteBase: "sprites/vanessa", hasSprite: true, spriteOffsetX: 0,
               stats: { power: 78, speed: 90, defense: 76 },
-              story: "Espíritu libre y golpes certeros; llega desde el sur con fuego en las manos." }
+              story: "Espíritu libre y golpes certeros; llega desde el sur con fuego en las manos." },
+            { id: 13, name: "OLHA", country: "Ucrania", flag: "🇺🇦", image: "personajes/olha.png",
+              spriteBase: "sprites/olha", hasSprite: false, spriteOffsetX: 0, unavailable: true,
+              stats: { power: 82, speed: 84, defense: 80 },
+              story: "Resiliente y feroz; trae el invierno del este en cada golpe." }
         ];
 
         // Reference for Arcade mode boss
@@ -2864,13 +2907,15 @@
             roster.innerHTML = '';
             fighters.filter(f => !f.isBoss).forEach(f => {
                 const div = document.createElement('div');
-                div.className = 'roster-fighter';
+                div.className = 'roster-fighter' + (f.unavailable ? ' unavailable' : '');
                 div.dataset.id = f.id;
                 div.innerHTML = `
                     <img src="${f.image}" alt="${f.name}">
                     <div class="fighter-name">${f.flag} ${f.name}</div>
                 `;
-                div.onclick = () => selectFighter(f);
+                if (!f.unavailable) {
+                    div.onclick = () => selectFighter(f);
+                }
                 roster.appendChild(div);
             });
             const random = document.createElement('div');
@@ -2879,7 +2924,8 @@
                 <div class="fighter-name">RANDOM</div>
             `;
             random.onclick = () => {
-                const pick = fighters[Math.floor(Math.random() * fighters.length)];
+                const pool = fighters.filter(f => !f.isBoss && !f.unavailable);
+                const pick = pool[Math.floor(Math.random() * pool.length)];
                 selectFighter(pick);
             };
             roster.appendChild(random);
@@ -2911,8 +2957,8 @@
         }
 
         function getCpuFighter(excludeId) {
-            const options = fighters.filter(f => f.id !== excludeId);
-            if (!options.length) return fighters[0];
+            const options = fighters.filter(f => f.id !== excludeId && !f.unavailable && !f.isBoss);
+            if (!options.length) return fighters.find(f => !f.unavailable) || fighters[0];
             return options[Math.floor(Math.random() * options.length)];
         }
 
@@ -3812,7 +3858,7 @@
         }
 
         function arcadeInit(fighter) {
-            const regularFighters = fighters.filter(f => f.id !== fighter.id && !f.isBoss);
+            const regularFighters = fighters.filter(f => f.id !== fighter.id && !f.isBoss && !f.unavailable);
             const shuffled = shuffleArray(regularFighters);
             const opponents = shuffled.slice(0, 8);
             opponents.push(ALBERTO_FIGHTER);
@@ -4012,6 +4058,36 @@
             }
         });
 
+        window.addEventListener('load', () => {
+            // Show announcement popup once per session
+            if (!sessionStorage.getItem('enroma_announce_olha')) {
+                const overlay = document.getElementById('announce-overlay');
+                if (overlay) overlay.style.display = 'flex';
+            }
+        });
+
+        function dismissAnnounce() {
+            sessionStorage.setItem('enroma_announce_olha', '1');
+            const overlay = document.getElementById('announce-overlay');
+            if (overlay) overlay.remove();
+        }
     </script>
+
+    <!-- Announcement Popup -->
+    <div class="announce-overlay" id="announce-overlay" style="display:none;">
+        <div class="announce-modal">
+            <div class="announce-badge">NUEVO</div>
+            <img src="personajes/olha.png" alt="Olha" class="announce-portrait">
+            <div class="announce-title">OLHA</div>
+            <div class="announce-subtitle">UNA NUEVA LUCHADORA SE UNE AL COMBATE</div>
+            <div class="announce-features">
+                <div class="announce-feature">
+                    <div class="announce-feature-label">FIGHTER</div>
+                    <div class="announce-feature-desc">Nueva luchadora ucraniana — utilizable próximamente</div>
+                </div>
+            </div>
+            <button class="announce-btn" onclick="dismissAnnounce()">VAMOS!</button>
+        </div>
+    </div>
 </body>
 </html>
