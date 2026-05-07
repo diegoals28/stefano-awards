@@ -2083,7 +2083,7 @@
               stats: { power: 78, speed: 90, defense: 76 },
               story: "Espíritu libre y golpes certeros; llega desde el sur con fuego en las manos." },
             { id: 13, name: "OLHA", country: "Ucrania", flag: "🇺🇦", image: "personajes/olha.png",
-              spriteBase: "sprites/olha", hasSprite: false, spriteOffsetX: 0, unavailable: true,
+              spriteBase: "sprites/olha", hasSprite: true, spriteOffsetX: 0,
               stats: { power: 82, speed: 84, defense: 80 },
               story: "Resiliente y feroz; trae el invierno del este en cada golpe." }
         ];
@@ -4060,14 +4060,14 @@
 
         window.addEventListener('load', () => {
             // Show announcement popup once per session
-            if (!sessionStorage.getItem('enroma_announce_olha')) {
+            if (!sessionStorage.getItem('enroma_announce_olha_v2')) {
                 const overlay = document.getElementById('announce-overlay');
                 if (overlay) overlay.style.display = 'flex';
             }
         });
 
         function dismissAnnounce() {
-            sessionStorage.setItem('enroma_announce_olha', '1');
+            sessionStorage.setItem('enroma_announce_olha_v2', '1');
             const overlay = document.getElementById('announce-overlay');
             if (overlay) overlay.remove();
         }
@@ -4083,7 +4083,7 @@
             <div class="announce-features">
                 <div class="announce-feature">
                     <div class="announce-feature-label">FIGHTER</div>
-                    <div class="announce-feature-desc">Nueva luchadora ucraniana — utilizable próximamente</div>
+                    <div class="announce-feature-desc">Nueva luchadora ucraniana disponible en todos los modos</div>
                 </div>
             </div>
             <button class="announce-btn" onclick="dismissAnnounce()">VAMOS!</button>
