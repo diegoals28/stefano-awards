@@ -324,7 +324,10 @@ const ROSTER = [
   { id: 10, name: 'ALBERTO',   flag: '🇪🇸', img: 'personajes/alberto.png',   spr: 'sprites/alberto_idle.png',   stats: { power: 95, speed: 88, defense: 95 }, color: 0xd4af37, boss: true },
 ];
 const U = 2.2; // world scale vs. base physics numbers
-function kartStats(s) {
+// Every kart is identical: the driver is only cosmetic, so nobody gets an edge from their character.
+const KART_BASE = { power: 82, speed: 84, defense: 82 };
+function kartStats() {
+  const s = KART_BASE;
   return {
     max: (30 + (s.speed - 70) * 0.17) * U,
     accel: (13 + (s.speed - 70) * 0.08 + (100 - s.power) * 0.12) * U,
@@ -790,10 +793,7 @@ function updateSelect() {
   playerChar = ROSTER[selIdx];
   document.querySelectorAll('.char-card').forEach((c, i) => c.classList.toggle('sel', i === selIdx));
   document.getElementById('cd-name').textContent = playerChar.flag + ' ' + playerChar.name;
-  const k = kartStats(playerChar.stats);
-  const bars = [['VELOCIDAD', (k.max / U - 29) / 6], ['ACELERACIÓN', (k.accel / U - 13) / 6], ['PESO', (playerChar.stats.power - 65) / 32], ['MANEJO', (k.handling - 1.4) / 0.45]];
-  document.getElementById('cd-stats').innerHTML = bars.map(([n, v]) =>
-    `<div class="stat">${n}<div class="bar"><div class="fill" style="width:${Math.round(clamp(v, 0.08, 1) * 100)}%"></div></div></div>`).join('');
+  document.getElementById('cd-stats').innerHTML = '<div class="stat" style="text-align:center;color:#b9b4d0">Todos los karts son iguales: misma velocidad, aceleración, peso y manejo.</div>';
   document.querySelectorAll('#diff-row button').forEach(b => b.classList.toggle('on', +b.dataset.d === difficulty));
   const ch = playerChar; previewFrames = null;
   kartFrames(ch).then(f => { if (playerChar === ch) previewFrames = f; });
