@@ -153,6 +153,8 @@ body.is-touch #hud-tip { display: none; }
 .tag + .tag { margin-left: 6px; }
 .lobby-host { width: 100%; background: var(--panel); border: 2px solid var(--line); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
 .diff-row.tracks button { font-size: 7px; line-height: 1.5; }
+.veh-row button { font-size: 10px; padding: 11px 2px; }
+.lob-row .veh { font-size: 18px; font-family: sans-serif; }
 
 @media (max-width: 640px) {
   .char-grid { grid-template-columns: repeat(4, 1fr); gap: 6px; }
@@ -210,6 +212,10 @@ body.is-touch #hud-tip { display: none; }
       <canvas id="cd-kart" width="96" height="88" style="width:192px;height:176px;image-rendering:pixelated"></canvas>
       <div class="dn" id="cd-name"></div>
       <div id="cd-stats" style="width:100%;display:flex;flex-direction:column;gap:8px"></div>
+      <div class="stat">VEHÍCULO</div>
+      <div class="diff-row veh-row" id="veh-row">
+        <button data-v="kart">🏎️ KART</button><button data-v="moto">🏍️ MOTO</button>
+      </div>
       <div class="stat">DIFICULTAD CPU</div>
       <div class="diff-row" id="diff-row">
         <button data-d="0">FÁCIL</button><button data-d="1">NORMAL</button><button data-d="2">DIFÍCIL</button>
@@ -478,7 +484,12 @@ const FLAGS = {
   '🇺🇦': { h: [0x0057b7, 0xffd700] },
   '🇸🇻': { h: [0x0f47af, 0xffffff, 0x0f47af] },
 };
-function flagBoxes(ch) {
+function flagBoxes(ch, veh) {
+  const out0 = flagBoxesBase(ch); const v = VEHICLES[veh || 'kart'];
+  if (!v.flagDx && !v.flagDz) return out0;
+  return out0.map(b => [b[0] + v.flagDx, b[1] + v.flagDx, b[2], b[3], b[4] + (v.flagDz || 0), b[5] + (v.flagDz || 0), b[6]]);
+}
+function flagBoxesBase(ch) {
   const fl = FLAGS[ch.flag]; if (!fl) return [];
   const x0 = 1.28, x1 = 2.0, y0 = 1.5, y1 = 1.98, z0 = -1.72, z1 = -1.64, out = [[1.18, 1.28, 0.75, 2.02, -1.72, -1.63, 'dark']];
   if (fl.v) { fl.v.forEach((c, i) => { const w = (x1 - x0) / fl.v.length; out.push([x0 + i * w, x0 + (i + 1) * w, y0, y1, z0, z1, c]); }); return out; }
@@ -506,6 +517,23 @@ const KART_BOXES = [
   [-0.5, -0.24, 0.36, 0.62, -1.8, -1.5, 'metal'], [0.24, 0.5, 0.36, 0.62, -1.8, -1.5, 'metal'],
   [-0.42, 0.42, 0.98, 1.1, 0.4, 0.52, 'dark'],
 ];
+// motorbike model: two inline wheels, tank, seat, fork, handlebar
+const MOTO_BOXES = [
+  [-0.24, 0.24, 0, 1.0, 1.0, 1.95, 'tire'],
+  [-0.28, 0.28, 0, 1.05, -1.8, -0.75, 'tire'],
+  [-0.1, 0.1, 0.35, 0.65, 1.3, 1.65, 'metal'], [-0.1, 0.1, 0.38, 0.68, -1.42, -1.12, 'metal'],
+  [-0.38, 0.38, 0.5, 1.0, -0.75, 1.0, 'main'],
+  [-0.42, 0.42, 0.95, 1.25, 0.15, 1.0, 'main'],
+  [-0.36, 0.36, 0.92, 1.12, -1.25, 0.15, 'dark'],
+  [-0.3, 0.3, 1.0, 1.14, -1.85, -1.2, 'main'],
+  [-0.24, -0.14, 0.5, 1.55, 1.38, 1.5, 'metal'], [0.14, 0.24, 0.5, 1.55, 1.38, 1.5, 'metal'],
+  [-0.44, 0.44, 1.0, 1.55, 1.0, 1.38, 'trim'],
+  [-0.2, 0.2, 1.15, 1.42, 1.38, 1.55, 0xfff3b0],
+  [-0.78, 0.78, 1.52, 1.64, 0.92, 1.06, 'dark'],
+  [0.36, 0.52, 0.35, 0.56, -1.65, -0.35, 'metal'],
+  [-0.36, 0.36, 1.14, 1.2, -1.95, -1.85, 0xff3030],
+];
+const VEHICLES = { kart: { boxes: () => KART_BOXES, seat: [0, 0.68, -0.32], flagDx: 0 }, moto: { boxes: () => MOTO_BOXES, seat: [0, 1.08, -0.55], flagDx: -0.86, flagDz: -0.22 } };
 const FACES = [ // normal, then 4 corner selectors (indices into [x0/x1, y0/y1, z0/z1])
   { n: [1, 0, 0],  c: [[1, 0, 0], [1, 1, 0], [1, 1, 1], [1, 0, 1]] },
   { n: [-1, 0, 0], c: [[0, 0, 0], [0, 1, 0], [0, 1, 1], [0, 0, 1]] },
@@ -513,15 +541,16 @@ const FACES = [ // normal, then 4 corner selectors (indices into [x0/x1, y0/y1, 
   { n: [0, 0, 1],  c: [[0, 0, 1], [1, 0, 1], [1, 1, 1], [0, 1, 1]] },
   { n: [0, 0, -1], c: [[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]] },
 ];
-function renderKartFrame(ch, torso, theta) {
+function renderKartFrame(ch, torso, theta, veh) {
+  const V = VEHICLES[veh || 'kart'];
   const c = mkCanvas(FW, FH), g = c.getContext('2d');
   const p = 0.4, cp = Math.cos(p), sp = Math.sin(p), ct = Math.cos(theta), st = Math.sin(theta);
   const tf = (x, y, z) => { const X = x * ct + z * st, Z = -x * st + z * ct; return [FAX + X * FS, FAY - (y * cp + Z * sp) * FS, Z * cp - y * sp]; };
   const L = [-0.45, 0.78, -0.43];
   const cols = { main: ch.color, trim: (() => { const r = ((ch.color >> 16) & 255) * 0.55, gg = ((ch.color >> 8) & 255) * 0.55, b = (ch.color & 255) * 0.55; return (r << 16) | (gg << 8) | b; })(), dark: 0x26232e, tire: 0x1b1a20, metal: 0xc8c8d2 };
-  const items = KART_BOXES.concat(flagBoxes(ch)).map(b => ({ d: tf((b[0] + b[1]) / 2, (b[2] + b[3]) / 2, (b[4] + b[5]) / 2)[2], box: b }));
-  const seat = tf(0, 0.68, -0.32);
-  items.push({ d: tf(0, 1.25, -0.32)[2], torso: true });
+  const items = V.boxes().concat(flagBoxes(ch, veh)).map(b => ({ d: tf((b[0] + b[1]) / 2, (b[2] + b[3]) / 2, (b[4] + b[5]) / 2)[2], box: b }));
+  const seat = tf(V.seat[0], V.seat[1], V.seat[2]);
+  items.push({ d: tf(V.seat[0], V.seat[1] + 0.6, V.seat[2])[2], torso: true });
   items.sort((a, b) => b.d - a.d);
   for (const it of items) {
     if (it.torso) {
@@ -546,13 +575,16 @@ function renderKartFrame(ch, torso, theta) {
   return pixelize(c, true);
 }
 const frameCache = {};
-async function kartFrames(ch) {
-  if (frameCache[ch.id]) return frameCache[ch.id];
+const chibiCache = {};
+async function kartFrames(ch, veh) {
+  veh = VEHICLES[veh] ? veh : 'kart';
+  const key = ch.id + '-' + veh;
+  if (frameCache[key]) return frameCache[key];
   const im = loadImg(ch.spr); await im.ready;
-  const torso = im.naturalWidth ? extractChibi(im, Math.round(TORSO_H * FS)) : null;
+  if (!(ch.id in chibiCache)) chibiCache[ch.id] = im.naturalWidth ? extractChibi(im, Math.round(TORSO_H * FS)) : null;
   const frames = [];
-  for (let i = 0; i < NFRAMES; i++) frames.push(renderKartFrame(ch, torso, i / NFRAMES * TAU));
-  frameCache[ch.id] = frames;
+  for (let i = 0; i < NFRAMES; i++) frames.push(renderKartFrame(ch, chibiCache[ch.id], i / NFRAMES * TAU, veh));
+  frameCache[key] = frames;
   return frames;
 }
 
@@ -773,6 +805,9 @@ function playerInput() {
 // ---------- Menus ----------
 const SCREENS = ['scr-menu', 'scr-controls', 'scr-select', 'scr-track', 'scr-pause', 'scr-results', 'scr-loading', 'scr-online'];
 function showScreen(id) { Audio.init(); SCREENS.forEach(s => document.getElementById(s).classList.toggle('hidden', s !== id)); }
+let playerVeh = store('enroma_kart_veh') === 'moto' ? 'moto' : 'kart';
+let cpuVeh = {}; // CPU vehicle per character id (kept for a whole cup)
+const vehFor = ch => ch === playerChar ? playerVeh : (cpuVeh[ch.id] || (cpuVeh[ch.id] = Math.random() < 0.5 ? 'kart' : 'moto'));
 let mode = 'quick', playerChar = ROSTER[0], difficulty = parseInt(store('enroma_kart_diff') || '1', 10) || 0, selIdx = 0, cup = null;
 
 function goSelect(m) { mode = m; buildSelect(); showScreen('scr-select'); }
@@ -785,6 +820,7 @@ function buildSelect() {
     d.ondblclick = () => { selIdx = i; confirmChar(); };
     grid.appendChild(d);
   });
+  document.querySelectorAll('#veh-row button').forEach(b => b.onclick = () => { playerVeh = b.dataset.v; store('enroma_kart_veh', playerVeh); updateSelect(); });
   document.querySelectorAll('#diff-row button').forEach(b => b.onclick = () => { difficulty = +b.dataset.d; store('enroma_kart_diff', String(difficulty)); updateSelect(); });
   updateSelect();
 }
@@ -793,10 +829,12 @@ function updateSelect() {
   playerChar = ROSTER[selIdx];
   document.querySelectorAll('.char-card').forEach((c, i) => c.classList.toggle('sel', i === selIdx));
   document.getElementById('cd-name').textContent = playerChar.flag + ' ' + playerChar.name;
-  document.getElementById('cd-stats').innerHTML = '<div class="stat" style="text-align:center;color:#b9b4d0">Todos los karts son iguales: misma velocidad, aceleración, peso y manejo.</div>';
+  document.getElementById('cd-stats').innerHTML = '<div class="stat" style="text-align:center;color:#b9b4d0">Kart o moto, todos van igual: misma velocidad, aceleración, peso y manejo.</div>';
   document.querySelectorAll('#diff-row button').forEach(b => b.classList.toggle('on', +b.dataset.d === difficulty));
   const ch = playerChar; previewFrames = null;
-  kartFrames(ch).then(f => { if (playerChar === ch) previewFrames = f; });
+  document.querySelectorAll('#veh-row button').forEach(b => b.classList.toggle('on', b.dataset.v === playerVeh));
+  const veh = playerVeh;
+  kartFrames(ch, veh).then(f => { if (playerChar === ch && playerVeh === veh) previewFrames = f; });
 }
 function drawPreview(dt) {
   const pc = document.getElementById('cd-kart'); if (!pc || !previewFrames || pc.offsetParent === null) return;
@@ -813,14 +851,14 @@ function selectKeyNav(e) {
 function confirmChar() {
   if (mode === 'online') {
     if (inRoom()) {
-      if (net.host) { const me = net.players.find(p => p.id === net.id); if (me) me.charId = playerChar.id; hostBroadcastLobby(); }
-      else netSend({ type: 'hello', charId: playerChar.id });
+      if (net.host) { const me = net.players.find(p => p.id === net.id); if (me) { me.charId = playerChar.id; me.veh = playerVeh; } hostBroadcastLobby(); }
+      else netSend({ type: 'hello', charId: playerChar.id, veh: playerVeh });
     }
     showScreen('scr-online'); renderOnline(); return;
   }
   if (mode === 'cup') {
     const others = shuffle(ROSTER.filter(c => c.id !== playerChar.id)).slice(0, NUM_RACERS - 1);
-    cup = { race: 0, chars: [playerChar, ...others], points: {} };
+    cup = { race: 0, chars: [playerChar, ...others], points: {} }; cpuVeh = {};
     cup.chars.forEach(c => cup.points[c.id] = 0);
     startRace(0);
   } else { buildTrackSelect(); showScreen('scr-track'); }
@@ -1007,6 +1045,7 @@ async function startRace(trackIdx, online) {
     grid = online.grid;
     order = grid.map(g => ROSTER.find(c => c.id === g.charId) || ROSTER[0]);
   } else {
+    if (mode !== 'cup') cpuVeh = {};
     let chars;
     if (mode === 'cup') chars = cup.chars.slice();
     else chars = [playerChar, ...shuffle(ROSTER.filter(c => c.id !== playerChar.id)).slice(0, NUM_RACERS - 1)];
@@ -1014,7 +1053,8 @@ async function startRace(trackIdx, online) {
     else { const cpus = chars.filter(c => c !== playerChar); order = cpus.slice(0, 5).concat([playerChar], cpus.slice(5)); }
   }
   try { await document.fonts.ready; } catch (e) {}
-  const frames = await Promise.all(order.map(kartFrames));
+  const vehs = order.map((ch, i) => grid ? (grid[i].veh || 'kart') : vehFor(ch));
+  const frames = await Promise.all(order.map((ch, i) => kartFrames(ch, vehs[i])));
   if (token !== raceToken) return;
   track = buildTrack(def);
   paintMap(def);
@@ -1024,6 +1064,7 @@ async function startRace(trackIdx, online) {
     const g = grid ? grid[slot] : null;
     const isPlayer = g ? (net && g.id === net.id) : ch === playerChar;
     const k = makeKart(ch, isPlayer, slot, frames[slot]);
+    k.veh = vehs[slot];
     if (g) {
       k.netId = g.id; k.cpu = !!g.cpu;
       k.remote = !isPlayer && !(g.cpu && amHost);
@@ -1350,10 +1391,18 @@ function drawKart(k, q, cam) {
   const rel = wrapAngle(vis - view);
   const fi = ((Math.round(rel / TAU * NFRAMES) % NFRAMES) + NFRAMES) % NFRAMES;
   const ds = q.s * KS / FS;
-  drawShadow(q, 2.4 * KS);
+  const moto = k.veh === 'moto';
+  drawShadow(q, (moto ? 1.5 : 2.4) * KS);
   const bounce = k.speed > 5 && race.phase === 'racing' ? (Math.floor(race.t * 18 + k.ch.id) % 2) * 0.12 : 0;
   const x = q.sx - FAX * ds, y = q.sy - FAY * ds - (k.hopY + bounce) * q.s;
-  ctx.drawImage(k.frames[fi], Math.round(x), Math.round(y), Math.round(FW * ds), Math.round(FH * ds));
+  if (moto) {
+    // bikes lean into the turn (pivot on the ground contact point)
+    const turn = k.drift.active ? k.drift.dir * 0.75 : k.steerVis * 0.5;
+    k.lean = lerp(k.lean || 0, turn * clamp(Math.abs(k.speed) / 40, 0, 1) * 0.42, 0.25);
+    ctx.save(); ctx.translate(Math.round(q.sx), Math.round(q.sy - (k.hopY + bounce) * q.s)); ctx.rotate(k.lean);
+    ctx.drawImage(k.frames[fi], Math.round(-FAX * ds), Math.round(-FAY * ds), Math.round(FW * ds), Math.round(FH * ds));
+    ctx.restore();
+  } else ctx.drawImage(k.frames[fi], Math.round(x), Math.round(y), Math.round(FW * ds), Math.round(FH * ds));
   // rear effects (boost flames / drift sparks)
   const bx = k.pos.x - Math.cos(vis) * 3 * KS, bz = k.pos.z - Math.sin(vis) * 3 * KS;
   const r = project(cam, bx, bz);
@@ -1362,7 +1411,7 @@ function drawKart(k, q, cam) {
     if (k.boostT > 0) for (let i = 0; i < 4; i++) { ctx.fillStyle = i % 2 ? '#ffd23f' : '#ff6a00'; ctx.fillRect(r.sx + (Math.random() - 0.5) * 3 * s, r.sy - (1 + Math.random() * 1.5) * s - k.hopY * s, Math.max(1, s * 1.1), Math.max(1, s * 1.1)); }
     if (k.drift.active && k.drift.charge > 0.8) {
       ctx.fillStyle = k.drift.charge > 1.7 ? '#ff8c1a' : '#4cc9f0';
-      for (let i = 0; i < 5; i++) { const side = (i % 2 ? 1 : -1) * 2.2 * KS * s; ctx.fillRect(r.sx + side + (Math.random() - 0.5) * 2 * s, r.sy - Math.random() * 1.6 * s, Math.max(1, s * 0.7), Math.max(1, s * 0.7)); }
+      for (let i = 0; i < 5; i++) { const side = (i % 2 ? 1 : -1) * (moto ? 0.5 : 2.2) * KS * s; ctx.fillRect(r.sx + side + (Math.random() - 0.5) * 2 * s, r.sy - Math.random() * 1.6 * s, Math.max(1, s * 0.7), Math.max(1, s * 0.7)); }
     } else if (k.drift.active && Math.random() < 0.6) {
       ctx.fillStyle = 'rgba(230,230,230,.8)'; ctx.fillRect(r.sx + (Math.random() - 0.5) * 4 * s, r.sy - Math.random() * s, Math.max(1, s), Math.max(1, s));
     }
@@ -1455,7 +1504,7 @@ function netConnect(code, asHost) {
     ws: null, id: Math.random().toString(36).slice(2, 10), code, host: asHost, hostId: asHost ? null : null,
     players: [], seen: {}, track: 0, fill: true, racing: false, lastHost: performance.now(), pid: 0, ready: new Set(), pendingGo: false,
   };
-  if (asHost) { my.hostId = my.id; my.players = [{ id: my.id, charId: playerChar.id }]; }
+  if (asHost) { my.hostId = my.id; my.players = [{ id: my.id, charId: playerChar.id, veh: playerVeh }]; }
   netStatus('CONECTANDO…'); renderOnline();
   let ws;
   try { ws = new WebSocket(SIGNALING_URL); } catch (e) { netStatus('No se pudo conectar al servidor.'); return; }
@@ -1491,7 +1540,7 @@ function onNet(m) {
     netStatus('');
     if (net.host) hostBroadcastLobby();
     else {
-      netSend({ type: 'hello', charId: playerChar.id }); netStatus('BUSCANDO LA SALA…');
+      netSend({ type: 'hello', charId: playerChar.id, veh: playerVeh }); netStatus('BUSCANDO LA SALA…');
       net.joinTimer = setTimeout(() => { if (net && !net.hostId) netStatus('No hay nadie en la sala ' + net.code + '. Revisa el código.'); }, 6000);
     }
     renderOnline(); return;
@@ -1505,8 +1554,8 @@ function onNet(m) {
       if (!net.host) break;
       {
         const p = net.players.find(q => q.id === m.from);
-        if (p) p.charId = m.charId;
-        else { if (net.players.length >= NUM_RACERS) { netSend({ type: 'full', to: m.from }); break; } net.players.push({ id: m.from, charId: m.charId }); }
+        if (p) { p.charId = m.charId; p.veh = m.veh; }
+        else { if (net.players.length >= NUM_RACERS) { netSend({ type: 'full', to: m.from }); break; } net.players.push({ id: m.from, charId: m.charId, veh: m.veh }); }
         hostBroadcastLobby();
       }
       break;
@@ -1516,7 +1565,7 @@ function onNet(m) {
       if (!net.hostId) { net.hostId = m.from; clearTimeout(net.joinTimer); netStatus(''); }
       if (m.from !== net.hostId) break;
       net.lastHost = now; net.players = m.players; net.track = m.track; net.racing = m.racing;
-      if (!net.players.find(p => p.id === net.id)) netSend({ type: 'hello', charId: playerChar.id });
+      if (!net.players.find(p => p.id === net.id)) netSend({ type: 'hello', charId: playerChar.id, veh: playerVeh });
       if (m.back && race) { stopRaceView(); showScreen('scr-online'); }
       renderOnline();
       break;
@@ -1559,12 +1608,12 @@ setInterval(() => {
 
 function hostStart() {
   if (!net || !net.host) return;
-  const humans = net.players.map(p => ({ id: p.id, charId: p.charId }));
+  const humans = net.players.map(p => ({ id: p.id, charId: p.charId, veh: p.veh === 'moto' ? 'moto' : 'kart' }));
   if (humans.length < 2 && !net.fill) { netStatus('Necesitas al menos otro jugador o activar la CPU.'); return; }
   const used = new Set(humans.map(h => h.charId));
   const fresh = shuffle(ROSTER.filter(c => !used.has(c.id))), any = shuffle(ROSTER.slice());
   const cpus = [];
-  if (net.fill) for (let i = humans.length; i < NUM_RACERS; i++) cpus.push({ id: 'cpu' + i, charId: (fresh.shift() || any.shift()).id, cpu: true });
+  if (net.fill) for (let i = humans.length; i < NUM_RACERS; i++) cpus.push({ id: 'cpu' + i, charId: (fresh.shift() || any.shift()).id, cpu: true, veh: Math.random() < 0.5 ? 'kart' : 'moto' });
   const msg = { type: 'start', track: net.track, grid: shuffle(humans.concat(cpus)), diff: difficulty };
   net.racing = true; net.ready = new Set(); net.pendingGo = false;
   netSend(msg); hostBroadcastLobby(); startRace(net.track, msg);
@@ -1592,7 +1641,7 @@ function renderOnline() {
   document.getElementById('on-players').innerHTML = net.players.map(p => {
     const ch = ROSTER.find(c => c.id === p.charId) || ROSTER[0];
     const tags = (p.id === net.id ? '<span class="tag me">TÚ</span>' : '') + (p.id === (net.host ? net.id : net.hostId) ? '<span class="tag">ANFITRIÓN</span>' : '');
-    return `<div class="lob-row"><img src="${ch.img}" alt="">${ch.flag} ${ch.name}${tags}</div>`;
+    return `<div class="lob-row"><img src="${ch.img}" alt="">${ch.flag} ${ch.name} <span class="veh">${p.veh === 'moto' ? '🏍️' : '🏎️'}</span>${tags}</div>`;
   }).join('') + (net.fill ? `<div class="lob-row cpu">+ ${Math.max(0, NUM_RACERS - net.players.length)} CPU</div>` : '');
   document.getElementById('on-host').classList.toggle('hidden', !net.host);
   document.getElementById('on-wait').classList.toggle('hidden', net.host);
@@ -1616,6 +1665,8 @@ function updateRemote(k, dt) {
   if (Math.hypot(tx - k.pos.x, tz - k.pos.z) > 40) { k.pos.x = tx; k.pos.z = tz; }
   else { const f = Math.min(1, dt * 12); k.pos.x = lerp(k.pos.x, tx, f); k.pos.z = lerp(k.pos.z, tz, f); }
   k.a += wrapAngle(n.a - k.a) * Math.min(1, dt * 12);
+  const turnRate = wrapAngle(n.a - (k.prevNetA ?? n.a)); k.prevNetA = n.a;
+  k.steerVis = lerp(k.steerVis, clamp(turnRate * 25, -1, 1), Math.min(1, dt * 6));
   k.speed = n.sp; k.hopY = n.hop; k.drift.active = n.dd !== 0; k.drift.dir = n.dd; k.drift.charge = n.dc; k.spinA = n.spin;
   k.boostT = n.boost ? 0.1 : 0; k.stunT = n.stun ? 0.1 : 0;
   k.idx = nearestIdx(k.pos, k.idx); k.lap = n.lap; k.progress = n.prog;
